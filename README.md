@@ -1,10 +1,13 @@
 # Ternuino CPU - Ternary Computer Simulator
 
-![Ternuino CPU Architecture](assets/ternuino_logo.png)
+![Ternuino CPU Architecture](assets/ternuino_logo.png){ height=64px }
 
 A ternary (base-3) CPU simulator that demonstrates the advantages of three-state logic over traditional binary systems.
 The Ternuino CPU uses trits (ternary digits) with values of -1, 0, and +1 instead of binary bits (0, 1).
-This program was written by Swen "El Dockerr" Kalski and is in active development.
+This program was written by Swen "El Dockerr" Kalski (me) and is in active development. This Repository also contains a beginner friendly introduction of ternary computing what is part of my bachelor thesis in mathematics. 
+
+A friendly, beginner‑oriented guide lives in [`docs/book/`](docs/book/README.md).
+
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -33,6 +36,15 @@ Ternary computing uses three states instead of two:
 - **+1** (positive/true)
 
 This provides a more natural representation for many logical operations and mathematical concepts.
+
+## The Ternuino Book (Docs)
+Ternary operations are the subject of my bachelor's thesis in mathematics. Ever since I heard about the Russian Setun computer a few years ago, this topic has been on my mind, and I am fascinated by the fact that we limit ourselves so much by only working with binary computers. That is why I have spun off parts of my bachelor thesis and would like to convince and inspire other makers and interested parties about this technology.
+
+
+A friendly, beginner‑oriented guide lives in `docs/book/`.
+
+- Start at `docs/book/README.md`
+- Chapters cover ternary numbers, logic, TritWord, CPU architecture, assembly, examples, the visualizer, and an FAQ.
 
 ## Key Advantages of Ternary Over Binary Systems
 
@@ -294,6 +306,7 @@ python generate_diagrams.py
 ```
 
 This will regenerate the architecture diagrams and comparison charts (requires matplotlib).
+
 
 ## Assembly Language
 
