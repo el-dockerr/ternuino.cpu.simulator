@@ -1,4 +1,5 @@
 from library.tritlogic import TritLogic
+from library.tritarith import tsign, tabs, tshl3, tshr3, tcmpr
 
 
 TRIT = (-1, 0, 1)
@@ -69,9 +70,32 @@ class Ternuino:
         elif op == "TNOT":
             reg = instr[1]
             self.registers[reg] = TritLogic.tnot(self.registers[reg])
+        elif op == "TSIGN":
+            reg = instr[1]
+            self.registers[reg] = tsign(self.registers[reg])
+        elif op == "TABS":
+            reg = instr[1]
+            self.registers[reg] = tabs(self.registers[reg])
+        elif op == "TSHL3":
+            reg = instr[1]
+            self.registers[reg] = tshl3(self.registers[reg])
+        elif op == "TSHR3":
+            reg = instr[1]
+            self.registers[reg] = tshr3(self.registers[reg])
+        elif op == "TCMPR":
+            reg1, reg2 = instr[1], instr[2]
+            self.registers[reg1] = tcmpr(self.registers[reg1], self.registers[reg2])
         elif op == "TJZ":
             reg, addr = instr[1], instr[2]
             if self.registers[reg] == 0:
+                self.pc = addr
+        elif op == "TJN":
+            reg, addr = instr[1], instr[2]
+            if self.registers[reg] < 0:
+                self.pc = addr
+        elif op == "TJP":
+            reg, addr = instr[1], instr[2]
+            if self.registers[reg] > 0:
                 self.pc = addr
 
 

@@ -80,13 +80,13 @@ class TernuinoAssembler:
         if op == "HLT":
             return ("HLT",)
 
-        if op in ("MOV", "ADD", "SUB", "MUL", "DIV", "TAND", "TOR", "TJZ"):
+        if op in ("MOV", "ADD", "SUB", "MUL", "DIV", "TAND", "TOR", "TJZ", "TJN", "TJP", "TCMPR"):
             need(2)
             arg1 = self._parse_argument(tokens[1])
             arg2 = self._parse_argument(tokens[2])
             return (op, arg1, arg2)
 
-        if op == "TNOT":
+        if op in ("TNOT", "TSIGN", "TABS", "TSHL3", "TSHR3"):
             need(1)
             arg1 = self._parse_argument(tokens[1])
             return (op, arg1)
@@ -128,7 +128,7 @@ class TernuinoAssembler:
                         raise ValueError(f"Undefined label '{target}' used in instruction {idx}")
                     target = self.labels[target]
                 resolved.append((op, target))
-            elif op == "TJZ":
+            elif op in ("TJZ", "TJN", "TJP"):
                 reg, target = instr[1], instr[2]
                 if isinstance(target, str):
                     if target not in self.labels:

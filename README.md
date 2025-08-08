@@ -11,13 +11,13 @@ This program was written by Swen "El Dockerr" Kalski and is in active developmen
 │                    TERNUINO CPU ARCHITECTURE                │
 ├─────────────────────────────────────────────────────────────┤
 │  REGISTERS           MEMORY              INSTRUCTION SET    │
-│  ┌─────────┐        ┌──────────┐        ┌──────────────┐    │
-│  │ A: trit │        │ 0: instr │        │ MOV  TAND    │    │
-│  │ B: trit │        │ 1: instr │        │ ADD  TOR     │    │
-│  │ C: trit │        │ 2: instr │        │ SUB  TNOT    │    │
-│  │         │        │    ...   │        │ MUL  JMP     │    │
-│  │ PC: int │        │26: instr │        │ DIV  TJZ     │    │
-│  └─────────┘        └──────────┘        │ HLT  NOP     │    │
+│  ┌─────────┐        ┌──────────┐        ┌────────────────────────────┐│
+│  │ A: trit │        │ 0: instr │        │ MOV  TAND   TSIGN  TSHL3   ││
+│  │ B: trit │        │ 1: instr │        │ ADD  TOR    TABS   TSHR3   ││
+│  │ C: trit │        │ 2: instr │        │ SUB  TNOT   TCMPR          ││
+│  │         │        │    ...   │        │ MUL  JMP    TJN    TJP     ││
+│  │ PC: int │        │26: instr │        │ DIV  TJZ    HLT    NOP     ││
+│  └─────────┘        └──────────┘        └────────────────────────────┘│
 │                                         └──────────────┘    │
 │  TERNARY VALUES:  -1 (negative)  0 (neutral)  +1 (positive) │
 └─────────────────────────────────────────────────────────────┘
@@ -105,16 +105,23 @@ or sign bit                 │  Natural signed representation:
 | Instruction | Description | Example |
 |-------------|-------------|---------|
 | `NOP` | No operation | `("NOP",)` |
-| `MOV reg, val` | Move value to register | `("MOV", "A", 1)` |
+| `MOV reg, val` | Move value/register to register | `("MOV", "A", 1)` |
 | `ADD reg1, reg2` | Add reg2 to reg1 | `("ADD", "A", "B")` |
 | `SUB reg1, reg2` | Subtract reg2 from reg1 | `("SUB", "A", "B")` |
 | `MUL reg1, reg2` | Multiply reg1 by reg2 | `("MUL", "A", "B")` |
-| `DIV reg1, reg2` | Divide reg1 by reg2 | `("DIV", "A", "B")` |
+| `DIV reg1, reg2` | Divide reg1 by reg2 (trunc. to 0) | `("DIV", "A", "B")` |
 | `JMP addr` | Jump to address | `("JMP", 5)` |
-| `TJZ reg, addr` | Jump if register is zero | `("TJZ", "A", 10)` |
-| `TAND reg1, reg2` | Ternary AND | `("TAND", "A", "B")` |
-| `TOR reg1, reg2` | Ternary OR | `("TOR", "A", "B")` |
-| `TNOT reg` | Ternary NOT | `("TNOT", "A")` |
+| `TJZ reg, addr` | Jump if reg == 0 | `("TJZ", "A", 10)` |
+| `TJN reg, addr` | Jump if reg < 0 | `("TJN", "A", 7)` |
+| `TJP reg, addr` | Jump if reg > 0 | `("TJP", "A", 12)` |
+| `TAND reg1, reg2` | Ternary AND (min) | `("TAND", "A", "B")` |
+| `TOR reg1, reg2` | Ternary OR (max) | `("TOR", "A", "B")` |
+| `TNOT reg` | Ternary NOT (negate) | `("TNOT", "A")` |
+| `TSIGN reg` | reg := sign(reg) ∈ {-1,0,+1} | `("TSIGN", "A")` |
+| `TABS reg` | reg := abs(reg) | `("TABS", "B")` |
+| `TSHL3 reg` | reg := reg * 3 | `("TSHL3", "A")` |
+| `TSHR3 reg` | reg := trunc(reg / 3) | `("TSHR3", "A")` |
+| `TCMPR reg1, reg2` | reg1 := sign(reg1 - reg2) | `("TCMPR", "A", "B")` |
 | `HLT` | Halt execution | `("HLT",)` |
 
 ### Ternary Logic Truth Tables
@@ -254,6 +261,9 @@ python interpreter.py programs/logic_demo.asm
 - `arithmetic_demo.asm` - Arithmetic operations (ADD, SUB, MUL, DIV)
 - `loop_demo.asm` - Loops and jumps with labels
 - `fibonacci_demo.asm` - Fibonacci-like sequence calculation
+- `ternary_sign_and_branch.asm` - Three-way compare and branching using TSIGN/TCMPR/TJN/TJP
+- `ternary_shift_scale.asm` - Base-3 scaling with TSHL3/TSHR3 plus TABS/TSIGN
+- `three_way_select_demo.asm` - 3-way decision using sign and ternary branches
 
 ### Testing Arithmetic Operations
 
