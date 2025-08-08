@@ -30,15 +30,15 @@ python visualizer.py
 Pick any program from the dropdown and press Load, then Step or Run. Double‑click memory lines to set breakpoints. Watch A/B/C and the A‑timeline change.
 
 ## Table of Contents
-1. [01 – Welcome to Ternary Computing](01-welcome-to-ternary-computing.md)
-2. [02 – Ternary Numbers 101 (Balanced Ternary)](02-ternary-numbers-101.md)
+1. [01 – Welcome to Ternary Computing](01-welcome.md)
+2. [02 – Ternary Numbers 101 (Balanced Ternary)](02-ternary-numbers.md)
 3. [03 – Ternary Logic: TAND, TOR, TNOT](03-ternary-logic.md)
 4. [04 – TritWord: Working With Multiple Trits](04-tritword.md)
-5. [05 – The Ternuino CPU: Architecture and Memory](05-ternuino-cpu.md)
-6. [06 – The Assembly Language](06-assembly-language.md)
-7. [07 – Programming Examples](07-programming-examples.md)
-8. [08 – Visualizer Tour (Breakpoints and Traces)](08-visualizer-tour.md)
-9. [09 – Extending the CPU and the Assembler](09-extending-cpu.md)
-10. [10 – FAQ and Glossary](10-faq-and-glossary.md)
+5. [05 – The Ternuino CPU: Architecture and Memory](05-architecture.md)
+6. [06 – The Assembly Language](06-assembly.md)
+7. [07 – Programming Examples](07-examples.md)
+8. [08 – Visualizer Tour (Breakpoints and Traces)](08-visualizer.md)
+9. [09 – Extending the CPU and the Assembler](09-extending.md)
+10. [10 – FAQ and Glossary](10-faq-glossary.md)
 
 Tip: You can read these files right in this folder, or render them with any Markdown viewer.
