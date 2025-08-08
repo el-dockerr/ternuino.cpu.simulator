@@ -1,6 +1,5 @@
-# Ternuino CPU - Ternary Computer Simulator
+# ![Ternuino CPU Architecture](assets/ternuino_logo.png) Ternuino CPU - Ternary Computer Simulator
 
-![Ternuino CPU Architecture](assets/ternuino_logo.png){ height=64px }
 
 A ternary (base-3) CPU simulator that demonstrates the advantages of three-state logic over traditional binary systems.
 The Ternuino CPU uses trits (ternary digits) with values of -1, 0, and +1 instead of binary bits (0, 1).
