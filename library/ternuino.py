@@ -15,9 +15,17 @@ class Ternuino:
             self.memory[i] = instr
 
     def step(self):
+        # Halt if PC out of memory bounds
+        if self.pc < 0 or self.pc >= len(self.memory):
+            self.running = False
+            return
+
         instr = self.memory[self.pc]
         self.pc += 1
         if instr is None:
+            # If we encounter empty memory, stop to avoid running off the end
+            if self.pc >= len(self.memory):
+                self.running = False
             return
 
         op = instr[0]

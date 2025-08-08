@@ -263,6 +263,20 @@ python arithmetic_test.py
 
 This will run comprehensive tests of the new arithmetic operations (SUB, MUL, DIV) and demonstrate the advantages of ternary arithmetic.
 
+### Hardware Visualizer (GUI)
+
+An interactive Tkinter GUI to visualize registers, memory, PC, and ternary logic:
+
+```bash
+python visualizer.py
+```
+
+Features:
+- Load existing programs from the `programs/` folder
+- Step through instructions or run continuously with adjustable speed
+- Watch registers and memory update live
+- Explore ternary logic (TAND, TOR, TNOT) and a conceptual ternary "transistor" indicator
+
 ### Regenerating Documentation Images
 
 ```bash
