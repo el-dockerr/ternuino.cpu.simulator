@@ -7,6 +7,10 @@ This program was written by Swen "El Dockerr" Kalski (me) and is in active devel
 
 A friendly, beginner‑oriented guide lives in [`docs/book/`](docs/book/README.md).
 
+For CPU Design I already have a CPU Design tool in place: [ternuino.cpu.visual-desinger](https://github.com/el-dockerr/ternuino.cpu.visual-desinger)*
+
+*yepp - there is a type. But at least this can be happen. Did you now, that Commodore did these when the build up the 8-bit systems (VIC 20 / C64 ...). They wrote Kernal instead of Kernel. And Google was a typo too. That's a good sign for the future of this project.
+
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
