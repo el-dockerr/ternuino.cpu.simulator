@@ -13,11 +13,28 @@ The Ternuino assembler supports a simple assembly language for writing programs 
 - `label:` - Define a label for jumps
 - Labels must be on their own line or at the beginning of a line
 
+### Sections and Data
+- `.data` – start data section
+- `.text` – start code section (default)
+- `.word N` – emit a single data word with integer value N
+- `.zero K` – reserve K zero-initialized data words
+
+Data labels declared in `.data` can be referenced by memory instructions and `LEA`.
+
 ### Instructions
 
 #### Data Movement
 - `MOV reg, value` - Move immediate value to register
 - `MOV reg1, reg2` - Copy value from reg2 to reg1
+
+#### Memory Instructions
+- `LD reg, addr|[REG]` – Load from data memory at `addr` or at address in `[REG]` into `reg`.
+- `ST reg, addr|[REG]` – Store value of `reg` into data memory at `addr` or at address in `[REG]`.
+- `LEA reg, label|addr` – Load effective address (integer) of a data or code label, or an immediate address, into `reg`.
+
+Notes:
+- Indirect addressing uses square brackets around a register, e.g. `[A]`, `[B]`, `[C]`.
+- Addresses wrap modulo the data memory size (default 27).
 
 #### Arithmetic Operations
 - `ADD reg1, reg2` - Add reg2 to reg1 (reg1 = reg1 + reg2)
@@ -82,6 +99,23 @@ MOV B, -1
 ADD A, B        # A = 1 + (-1) = 0
 MUL B, B        # B = (-1) * (-1) = 1
 DIV B, A        # B = 1 / 0 = 0 (safe division)
+HLT
+```
+
+### Memory Demo
+```assembly
+.data
+x:      .word 1
+y:      .word -1
+sum:    .word 0
+
+.text
+LEA A, x     # A = &x
+LD  B, [A]   # B = x
+LEA A, y
+LD  C, [A]   # C = y
+ADD B, C     # B = x + y
+ST  B, sum   # sum = B
 HLT
 ```
 

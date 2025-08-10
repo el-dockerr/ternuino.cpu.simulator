@@ -134,6 +134,9 @@ or sign bit                 │  Natural signed representation:
 | `TSHR3 reg` | reg := trunc(reg / 3) | `("TSHR3", "A")` |
 | `TCMPR reg1, reg2` | reg1 := sign(reg1 - reg2) | `("TCMPR", "A", "B")` |
 | `HLT` | Halt execution | `("HLT",)` |
+| `LD reg, addr|[REG]` | Load from data memory into reg | `("LD", "A", 5)`, `("LD", "A", ("IND","B"))` |
+| `ST reg, addr|[REG]` | Store reg into data memory | `("ST", "A", 7)`, `("ST", "A", ("IND","C"))` |
+| `LEA reg, label|addr` | Load effective address into reg | `("LEA", "B", "var")` |
 
 ### Ternary Logic Truth Tables
 
@@ -275,6 +278,7 @@ python interpreter.py programs/logic_demo.asm
 - `ternary_sign_and_branch.asm` - Three-way compare and branching using TSIGN/TCMPR/TJN/TJP
 - `ternary_shift_scale.asm` - Base-3 scaling with TSHL3/TSHR3 plus TABS/TSIGN
 - `three_way_select_demo.asm` - 3-way decision using sign and ternary branches
+- `memory_demo.asm` - LD/ST/LEA and .data/.text with indirect [REG]
 
 ### Testing Arithmetic Operations
 
@@ -340,7 +344,7 @@ Ternary computers were actually built and used:
 
 ## Future Enhancements
 
-- [ ] Memory management instructions
+- [x] Memory management instructions (LD/ST/LEA, .data/.text, [REG])
 - [x] Arithmetic operations (SUB, MUL, DIV)
 - [ ] I/O operations
 - [ ] Interrupt handling

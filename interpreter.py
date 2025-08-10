@@ -15,25 +15,30 @@ def run_program_file(filename):
         # Parse the assembly file
         assembler = TernuinoAssembler()
         program = assembler.parse_file(filename)
-        
+        data_image = assembler.get_data_image()
+
         print(f"=== Running program: {filename} ===")
-        print(f"Loaded {len(program)} instructions")
-        
+        print(f"Loaded {len(program)} instructions, data cells: {len(data_image)}")
+
         # Display the parsed program
         print("\nParsed program:")
         for i, instr in enumerate(program):
             print(f"  {i:2}: {instr}")
         print()
-        
+
         # Create and run the CPU
         cpu = Ternuino()
-        cpu.load_program(program)
-        
+        cpu.load_program(program, data_image)
+
         print("Initial registers:", cpu.registers)
+        if len(data_image) > 0:
+            print("Initial data_mem[0:9]:", cpu.data_mem[:min(9, len(cpu.data_mem))])
         cpu.run()
         print("Final registers:  ", cpu.registers)
+        if len(data_image) > 0:
+            print("Final data_mem[0:9]:  ", cpu.data_mem[:min(9, len(cpu.data_mem))])
         print()
-        
+
     except Exception as e:
         print(f"Error running program: {e}")
 

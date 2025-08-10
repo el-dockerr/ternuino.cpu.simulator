@@ -5,15 +5,24 @@ from library.tritarith import tsign, tabs, tshl3, tshr3, tcmpr
 TRIT = (-1, 0, 1)
 
 class Ternuino:
-    def __init__(self):
+    def __init__(self, dmem_size: int = 27):
         self.registers = { 'A': 0, 'B': 0, 'C': 0 }
         self.pc = 0
         self.running = True
-        self.memory = [None] * 27  # z. B. 27 Speicherzellen
+        self.memory = [None] * 27  # instruction memory (program)
+        self.dmem_size = dmem_size
+        self.data_mem = [0] * self.dmem_size  # data memory
 
-    def load_program(self, program):
+    def load_program(self, program, data: list | None = None):
         for i, instr in enumerate(program):
             self.memory[i] = instr
+        if data is not None:
+            # Initialize data memory (truncate or pad with zeros)
+            for i in range(min(len(data), self.dmem_size)):
+                self.data_mem[i] = data[i]
+            if len(data) < self.dmem_size:
+                for i in range(len(data), self.dmem_size):
+                    self.data_mem[i] = 0
 
     def step(self):
         # Halt if PC out of memory bounds
@@ -61,6 +70,39 @@ class Ternuino:
             self.pc = instr[1]
         elif op == "HLT":
             self.running = False
+        elif op == "LEA":
+            # Load effective address (integer) into register
+            reg, addr = instr[1], instr[2]
+            if isinstance(addr, tuple) and addr and addr[0] == "IND":
+                # LEA does not accept indirect; treat as error silently ignored
+                pass
+            else:
+                if isinstance(addr, int):
+                    self.registers[reg] = addr % self.dmem_size
+                else:
+                    # Should already be resolved to int by assembler
+                    self.registers[reg] = int(addr) % self.dmem_size
+        elif op == "LD":
+            # Load from data memory into register
+            reg, addr = instr[1], instr[2]
+            real_addr: int
+            if isinstance(addr, tuple) and addr and addr[0] == "IND":
+                r = addr[1]
+                real_addr = self.registers[r] % self.dmem_size
+            else:
+                # direct numeric address
+                real_addr = int(addr) % self.dmem_size
+            self.registers[reg] = self.data_mem[real_addr]
+        elif op == "ST":
+            # Store register value into data memory
+            reg, addr = instr[1], instr[2]
+            real_addr: int
+            if isinstance(addr, tuple) and addr and addr[0] == "IND":
+                r = addr[1]
+                real_addr = self.registers[r] % self.dmem_size
+            else:
+                real_addr = int(addr) % self.dmem_size
+            self.data_mem[real_addr] = self.registers[reg]
         elif op == "TAND":
             reg1, reg2 = instr[1], instr[2]
             self.registers[reg1] = TritLogic.tand(self.registers[reg1], self.registers[reg2])
