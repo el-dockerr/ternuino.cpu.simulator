@@ -370,5 +370,12 @@ Ternary computers were actually built and used:
 
 ## References
 
+### Books
 - "The Art of Computer Programming" - Knuth, D.E. - discusses ternary number systems
 - "Ternary Logic and Circuits" - John Gregg
+- "Computing Science: Third Base" - Hayes, Brian
+
+### Web References
+- [cabinetmagazine.org - DIALECTICAL COMPUTERS AND COLD WAR METAPHYSICS](https://cabinetmagazine.org/issues/65/weatherby.php)
+- [Earl T. Campbell - The Setun Computer](https://earltcampbell.com/2014/12/29/the-setun-computer/)
+- [Hayes, Brian - Computing Science: Third Base](https://www.jstor.org/stable/27857554)
