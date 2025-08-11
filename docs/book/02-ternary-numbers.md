@@ -58,7 +58,7 @@ But let's get back to the transformation between ternary and decimal. The number
 So we can read and calculate the number 1T1 as 1+(-1)*3+1*9 or more simple 1+(-3)+9. When you followed this so far you will realize that we have a very space for numbers.
 In a 8 bit binary representation we can only show 0 to 255 while 8 trit (what is the name for a ternary "bit") we have -3280 to 3280. This is a range of 6561 possible values and over 12 times more dense than a binary ever could be.
  
-And with help of a simple TXOR we can make a positive trit to a negative and vince versa and can do subtractions with the adder. So subtractions comes for free at last.
+And with help of a simple NEG command we can make a positive trit to a negative and vince versa and can do subtractions with the adder. So subtractions comes for free at last.
 
 ## Why balanced?
 Wouldn't it be easier to make use of unbalanced ternary numbers? I guess not.

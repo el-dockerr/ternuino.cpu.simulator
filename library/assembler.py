@@ -138,7 +138,7 @@ class TernuinoAssembler:
             arg2 = self._parse_argument(tokens[2])
             return (op, arg1, arg2)
 
-        if op in ("TNOT", "TSIGN", "TABS", "TSHL3", "TSHR3"):
+        if op in ("TNOT", "NEG", "TSIGN", "TABS", "TSHL3", "TSHR3"):
             need(1)
             arg1 = self._parse_argument(tokens[1])
             return (op, arg1)

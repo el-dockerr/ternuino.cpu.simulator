@@ -112,6 +112,9 @@ class Ternuino:
         elif op == "TNOT":
             reg = instr[1]
             self.registers[reg] = TritLogic.tnot(self.registers[reg])
+        elif op == "NEG":
+            reg = instr[1]
+            self.registers[reg] = -self.registers[reg]
         elif op == "TSIGN":
             reg = instr[1]
             self.registers[reg] = tsign(self.registers[reg])
