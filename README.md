@@ -203,6 +203,17 @@ Ternary multiplication table:
 
 ```
 ternuino-cpu/
+├── docs/book               # A little book about ternary computing
+│   ├── 01-welcome.md
+│   ├── 01-ternary-numbers.md
+│   ├── 03-ternary-logic.md
+│   ├── 04-tritword.md
+│   ├── 05-architecture.md
+│   ├── 06-assembly.md
+│   ├── 07-examples.md
+│   ├── 08-visualizer.md
+│   ├── 09-extending.md
+│   └── 01-faq-glossary.md
 ├── docs/               # Documentation and diagrams
 │   ├── ternuino-architecture.png  # CPU architecture diagram
 │   ├── binary-vs-ternary.png      # Comparison chart
