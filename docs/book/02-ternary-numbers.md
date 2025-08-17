@@ -60,6 +60,89 @@ In a 8 bit binary representation we can only show 0 to 255 while 8 trit (what is
  
 And with help of a simple NEG command we can make a positive trit to a negative and vince versa and can do subtractions with the adder. So subtractions comes for free at last.
 
+What should be mentioned here is that a addition of balanced ternary numbers can be done with ease. It is quiet the same as you would do with binary or decimal numbers.
+This example can help you, to get a better feeling for this numbers.
+
+At least we can say, that you just calculate two numbers and carry over a value if the number is bigger than one trit.
+Let's see this example:
+```
+T   1   1   T   0   1           (Decimal -143)
+T   T   1   1   1   T   +       (Decimal -243)
+--------------------------
+
+```
+
+So how we do that?
+The first digits are 1 and T. Both eliminate themselves, so it equals 0.
+```
+T   1   1   T   0   1           (Decimal -143)
+T   T   1   1   1   T   +       (Decimal -243)
+--------------------------
+                    0
+```
+
+The next digits are 0 and 1, what literally means 0 + 1, what equals as 1.
+```
+T   1   1   T   0   1           (Decimal -143)
+T   T   1   1   1   T   +       (Decimal -243)
+--------------------------
+                1   0
+```
+
+The next digits are T and 1, what eliminates themselves as we showed before.
+```
+T   1   1   T   0   1           (Decimal -143)
+T   T   1   1   1   T   +       (Decimal -243)
+--------------------------
+            0   1   0
+```
+
+Now it get interesting. 1 plus 1 gives 2 - this in in balanced ternary 1T. So we write down the T and carry over the 1.
+```
+   (1)
+T   1   1   T   0   1           (Decimal -143)
+T   T   1   1   1   T   +       (Decimal -243)
+--------------------------
+        T   0   1   0
+```
+
+Now, we just calculate the next three digits. You can simply read it as 1 + 1 + (-1), what becomes 1. So we just write 1.
+
+```
+   (1)
+T   1   1   T   0   1           (Decimal -143)
+T   T   1   1   1   T   +       (Decimal -243)
+--------------------------
+    1   T   0   1   0
+```
+
+Now calculate T plus T, what is in decimal (-1)+(-1), what becomes in decimal -2. In balanced ternary it is written as T1.
+So we write down 1 and have to carry over the T. But as it is the last digit, we can write it as T1, what comes down to this:
+
+```
+(T)    (1)
+    T   1   1   T   0   1           (Decimal -143)
+    T   T   1   1   1   T   +       (Decimal -243)
+    --------------------------
+T   1    1   T   0   1   0
+```
+
+So, we have `T11T010` what equals to -429. So our calculation is correct.
+If you forgot how the calculate from balanced ternary to decimal:
+
+```
+(0*1)+              0
+(3*1)+              1
+(9*0)+              0
+(27*-1)+            T
+(81*1)+             1
+(243*1)+            1    
+(729*-1)=           T    
+-429
+```
+
+So we produced a hand written calculation that can be easily performed for negative or positive numbers without taking care if it is a subtraction or addition. And since we can convert easily between negative numbers and positive ones by just change from T to 1 or vince versa, there is no real problem that might happens on binary systems.
+
 ## Why balanced?
 Wouldn't it be easier to make use of unbalanced ternary numbers? I guess not.
 For sure, It would be nice to have a ternary system that consist of 0, 1 and 2. But this would come at its costs.
