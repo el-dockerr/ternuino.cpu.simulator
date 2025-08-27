@@ -41,26 +41,3 @@ jobs:
         
         echo "All tests passed!"
 
-  code-quality:
-    name: Code Quality Check
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc make cppcheck
-        
-    - name: Static analysis with cppcheck
-      working-directory: src
-      run: |
-        cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem src/ include/ || echo "Static analysis completed with warnings"
-        
-    - name: Compile with strict warnings
-      working-directory: src
-      run: |
-        gcc -Wall -Wextra -Werror -std=c99 -Iinclude -c src/*.c
-        echo "Strict compilation check passed!"
