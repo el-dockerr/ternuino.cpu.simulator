@@ -105,7 +105,7 @@ opcode_t string_to_opcode(const char *str) {
     return OP_NOP;  // Default for unknown opcodes
 }
 
-register_t string_to_register(const char *str) {
+ternuino_register_t string_to_register(const char *str) {
     if (strcmp(str, "A") == 0) return REG_A;
     if (strcmp(str, "B") == 0) return REG_B;
     if (strcmp(str, "C") == 0) return REG_C;
@@ -341,6 +341,8 @@ bool parse_instruction_line(assembler_t *asm_state, const char *line,
 }
 
 bool resolve_labels(assembler_t *asm_state, instruction_t *program, int32_t program_size) {
+    (void)asm_state; // Suppress unused parameter warning
+    
     for (int i = 0; i < program_size; i++) {
         instruction_t *instr = &program[i];
         

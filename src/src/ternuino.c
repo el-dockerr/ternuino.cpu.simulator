@@ -92,7 +92,7 @@ void ternuino_step(ternuino_t *cpu) {
             break;
             
         case OP_MOV: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             int32_t val;
             if (instr->operand2.mode == ADDR_REGISTER) {
                 val = cpu->registers[instr->operand2.value.reg];
@@ -104,29 +104,29 @@ void ternuino_step(ternuino_t *cpu) {
         }
         
         case OP_ADD: {
-            register_t reg1 = instr->operand1.value.reg;
-            register_t reg2 = instr->operand2.value.reg;
+            ternuino_register_t reg1 = instr->operand1.value.reg;
+            ternuino_register_t reg2 = instr->operand2.value.reg;
             cpu->registers[reg1] += cpu->registers[reg2];
             break;
         }
         
         case OP_SUB: {
-            register_t reg1 = instr->operand1.value.reg;
-            register_t reg2 = instr->operand2.value.reg;
+            ternuino_register_t reg1 = instr->operand1.value.reg;
+            ternuino_register_t reg2 = instr->operand2.value.reg;
             cpu->registers[reg1] -= cpu->registers[reg2];
             break;
         }
         
         case OP_MUL: {
-            register_t reg1 = instr->operand1.value.reg;
-            register_t reg2 = instr->operand2.value.reg;
+            ternuino_register_t reg1 = instr->operand1.value.reg;
+            ternuino_register_t reg2 = instr->operand2.value.reg;
             cpu->registers[reg1] *= cpu->registers[reg2];
             break;
         }
         
         case OP_DIV: {
-            register_t reg1 = instr->operand1.value.reg;
-            register_t reg2 = instr->operand2.value.reg;
+            ternuino_register_t reg1 = instr->operand1.value.reg;
+            ternuino_register_t reg2 = instr->operand2.value.reg;
             if (cpu->registers[reg2] != 0) {
                 cpu->registers[reg1] = cpu->registers[reg1] / cpu->registers[reg2];
             } else {
@@ -146,7 +146,7 @@ void ternuino_step(ternuino_t *cpu) {
             break;
             
         case OP_LEA: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             if (instr->operand2.mode == ADDR_INDIRECT) {
                 // LEA does not accept indirect; treat as error (silently ignored)
                 break;
@@ -157,7 +157,7 @@ void ternuino_step(ternuino_t *cpu) {
         }
         
         case OP_LD: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             int32_t addr;
             if (instr->operand2.mode == ADDR_INDIRECT) {
                 addr = cpu->registers[instr->operand2.value.reg] % cpu->dmem_size;
@@ -169,7 +169,7 @@ void ternuino_step(ternuino_t *cpu) {
         }
         
         case OP_ST: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             int32_t addr;
             if (instr->operand2.mode == ADDR_INDIRECT) {
                 addr = cpu->registers[instr->operand2.value.reg] % cpu->dmem_size;
@@ -181,64 +181,64 @@ void ternuino_step(ternuino_t *cpu) {
         }
         
         case OP_TAND: {
-            register_t reg1 = instr->operand1.value.reg;
-            register_t reg2 = instr->operand2.value.reg;
+            ternuino_register_t reg1 = instr->operand1.value.reg;
+            ternuino_register_t reg2 = instr->operand2.value.reg;
             cpu->registers[reg1] = trit_and(cpu->registers[reg1], cpu->registers[reg2]);
             break;
         }
         
         case OP_TOR: {
-            register_t reg1 = instr->operand1.value.reg;
-            register_t reg2 = instr->operand2.value.reg;
+            ternuino_register_t reg1 = instr->operand1.value.reg;
+            ternuino_register_t reg2 = instr->operand2.value.reg;
             cpu->registers[reg1] = trit_or(cpu->registers[reg1], cpu->registers[reg2]);
             break;
         }
         
         case OP_TNOT: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             cpu->registers[reg] = trit_not(cpu->registers[reg]);
             break;
         }
         
         case OP_NEG: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             cpu->registers[reg] = -cpu->registers[reg];
             break;
         }
         
         case OP_TSIGN: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             cpu->registers[reg] = tsign(cpu->registers[reg]);
             break;
         }
         
         case OP_TABS: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             cpu->registers[reg] = tabs(cpu->registers[reg]);
             break;
         }
         
         case OP_TSHL3: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             cpu->registers[reg] = tshl3(cpu->registers[reg]);
             break;
         }
         
         case OP_TSHR3: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             cpu->registers[reg] = tshr3(cpu->registers[reg]);
             break;
         }
         
         case OP_TCMPR: {
-            register_t reg1 = instr->operand1.value.reg;
-            register_t reg2 = instr->operand2.value.reg;
+            ternuino_register_t reg1 = instr->operand1.value.reg;
+            ternuino_register_t reg2 = instr->operand2.value.reg;
             cpu->registers[reg1] = tcmpr(cpu->registers[reg1], cpu->registers[reg2]);
             break;
         }
         
         case OP_TJZ: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             int32_t addr = resolve_operand_value(cpu, &instr->operand2);
             if (cpu->registers[reg] == 0) {
                 cpu->pc = addr;
@@ -247,7 +247,7 @@ void ternuino_step(ternuino_t *cpu) {
         }
         
         case OP_TJN: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             int32_t addr = resolve_operand_value(cpu, &instr->operand2);
             if (cpu->registers[reg] < 0) {
                 cpu->pc = addr;
@@ -256,7 +256,7 @@ void ternuino_step(ternuino_t *cpu) {
         }
         
         case OP_TJP: {
-            register_t reg = instr->operand1.value.reg;
+            ternuino_register_t reg = instr->operand1.value.reg;
             int32_t addr = resolve_operand_value(cpu, &instr->operand2);
             if (cpu->registers[reg] > 0) {
                 cpu->pc = addr;
@@ -301,7 +301,7 @@ const char* opcode_to_string(opcode_t opcode) {
     }
 }
 
-const char* register_to_string(register_t reg) {
+const char* register_to_string(ternuino_register_t reg) {
     switch (reg) {
         case REG_A: return "A";
         case REG_B: return "B";

@@ -38,7 +38,7 @@ bool resolve_labels(assembler_t *asm_state, instruction_t *program, int32_t prog
 // Helper functions
 bool parse_operand(const char *token, operand_t *operand);
 opcode_t string_to_opcode(const char *str);
-register_t string_to_register(const char *str);
+ternuino_register_t string_to_register(const char *str);
 bool is_valid_register(const char *str);
 bool is_indirect_operand(const char *str, char *reg_name);
 

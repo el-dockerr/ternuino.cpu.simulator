@@ -51,14 +51,14 @@ typedef enum {
     REG_A = 0,
     REG_B = 1,
     REG_C = 2
-} register_t;
+} ternuino_register_t;
 
 // Operand structure
 typedef struct {
     addr_mode_t mode;
     union {
         int32_t immediate;
-        register_t reg;
+        ternuino_register_t reg;
         int32_t address;
     } value;
 } operand_t;
@@ -93,7 +93,7 @@ void ternuino_run(ternuino_t *cpu);
 
 // Helper functions
 const char* opcode_to_string(opcode_t opcode);
-const char* register_to_string(register_t reg);
+const char* register_to_string(ternuino_register_t reg);
 void print_instruction(const instruction_t *instr);
 void print_cpu_state(const ternuino_t *cpu);
 
