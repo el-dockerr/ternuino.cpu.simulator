@@ -1,5 +1,7 @@
-# ![Ternuino CPU Architecture](assets/ternuino_logo.png) Ternuino CPU - Ternary Computer Simulator
+# Ternuino CPU - Ternary Computer Simulator
 
+
+![Ternuino CPU Wallpaper](assets/ternuino_wallpaper.png)
 
 A ternary (base-3) CPU simulator that demonstrates the advantages of three-state logic over traditional binary systems.
 The Ternuino CPU uses trits (ternary digits) with values of -1, 0, and +1 instead of binary bits (0, 1).
@@ -199,90 +201,44 @@ Ternary multiplication table:
 - Natural handling of negative results
 - Truncation towards zero for fractional results
 
-## File Structure
+## Installation Requirements
 
-```
-ternuino-cpu/
-├── docs/book               # A little book about ternary computing
-│   ├── 01-welcome.md
-│   ├── 01-ternary-numbers.md
-│   ├── 03-ternary-logic.md
-│   ├── 04-tritword.md
-│   ├── 05-architecture.md
-│   ├── 06-assembly.md
-│   ├── 07-examples.md
-│   ├── 08-visualizer.md
-│   ├── 09-extending.md
-│   └── 01-faq-glossary.md
-├── docs/               # Documentation and diagrams
-│   ├── ternuino-architecture.png  # CPU architecture diagram
-│   ├── binary-vs-ternary.png      # Comparison chart
-│   └── *.svg                      # Vector versions of diagrams
-├── library/
-│   ├── ternuino.py     # Main CPU simulator
-│   ├── tritlogic.py    # Ternary logic operations
-│   ├── tritword.py     # Multi-trit word handling
-│   └── assembler.py    # Assembly language parser
-├── programs/           # Assembly language programs
-│   ├── logic_demo.asm      # Basic ternary logic demo
-│   ├── arithmetic_demo.asm # Arithmetic operations demo
-│   ├── loop_demo.asm       # Loop and jump demo
-│   └── fibonacci_demo.asm  # Fibonacci-like sequence
-├── interpreter.py      # Main program runner with assembly support
-├── arithmetic_test.py  # Arithmetic operations test suite
-├── generate_diagrams.py # Script to create documentation images
-├── README.md          # This file
-└── ASSEMBLY.md        # Assembly language reference
-```
+### What You Need to Install
 
-## Usage Example
+#### Windows Users:
+**Option 1: MSYS2 (Recommended)**
+1. Download MSYS2 from https://www.msys2.org/
+2. Install and run MSYS2 terminal
+3. Install GCC: `pacman -S mingw-w64-ucrt-x86_64-gcc`
+4. Use our `build-msys2.bat` script (auto-detects installation)
 
-```python
-from library.ternuino import Ternuino
+**Option 2: MinGW-w64**
+1. Download from https://www.mingw-w64.org/downloads/
+2. Add to Windows PATH
+3. Use `build.bat`
 
-# Example program: demonstrate ternary logic and arithmetic
-program = [
-    ("MOV", "A", 1),      # A = +1 (positive)
-    ("MOV", "B", -1),     # B = -1 (negative)
-    ("TAND", "A", "B"),   # A = min(+1, -1) = -1
-    ("TNOT", "A"),        # A = -(-1) = +1
-    ("SUB", "A", "B"),    # A = +1 - (-1) = +2
-    ("DIV", "A", "B"),    # A = +2 / (-1) = -2
-    ("HLT",)              # Stop execution
-]
+**Option 3: Visual Studio**
+1. Install Visual Studio with C++ support
+2. Use Developer Command Prompt
+3. Use `build.bat`
 
-cpu = Ternuino()
-cpu.load_program(program)
-cpu.run()
-print(cpu.registers)  # Output: {'A': -2, 'B': -1, 'C': 0}
-```
-
-### Arithmetic Operations Example
-
-```python
-# Demonstrate ternary arithmetic advantages
-program_arithmetic = [
-    ("MOV", "A", 1),      # A = +1
-    ("MOV", "B", -1),     # B = -1
-    ("MOV", "C", 0),      # C = 0
-    ("ADD", "A", "B"),    # A = 1 + (-1) = 0 (perfectly balanced)
-    ("MUL", "B", "B"),    # B = (-1) * (-1) = 1 (negative squared = positive)
-    ("SUB", "C", "A"),    # C = 0 - 0 = 0 (neutral operations)
-    ("HLT",)
-]
-```
-
-## Running the Simulator
-
-### Interactive Mode
+#### Linux Users:
 ```bash
-python interpreter.py
-```
-This will show a menu of available assembly programs to choose from.
+# Ubuntu/Debian
+sudo apt update && sudo apt install gcc make
 
-### Run Specific Program
+# CentOS/RHEL/Fedora  
+sudo yum install gcc make
+# or: sudo dnf install gcc make
+```
+
+#### macOS Users:
 ```bash
-python interpreter.py programs/logic_demo.asm
+# Install Xcode Command Line Tools
+xcode-select --install
+
+# Or via Homebrew
+brew install gcc
 ```
 
 ### Available Example Programs
@@ -295,36 +251,168 @@ python interpreter.py programs/logic_demo.asm
 - `three_way_select_demo.asm` - 3-way decision using sign and ternary branches
 - `memory_demo.asm` - LD/ST/LEA and .data/.text with indirect [REG]
 
-### Testing Arithmetic Operations
+## Features
+
+- Complete ternary CPU simulation with all original instructions
+- Assembly language parser and assembler
+- Ternary logic operations (TAND, TOR, TNOT)
+- Ternary arithmetic operations (TSIGN, TABS, TSHL3, TSHR3, TCMPR)
+- Memory operations (LD, ST, LEA) with direct and indirect addressing
+- Control flow instructions (JMP, TJZ, TJN, TJP)
+- TritWord representation for ternary numbers
+- Interactive program selection
+- Command-line program execution
+
+## Requirements
+
+### Windows
+- **GCC Compiler** (one of the following):
+  - **MinGW-w64** (recommended): https://www.mingw-w64.org/downloads/
+  - **MSYS2**: https://www.msys2.org/
+  - **TDM-GCC**: https://jmeubank.github.io/tdm-gcc/
+  - **Visual Studio** with C++ support (use Developer Command Prompt)
+
+### Linux/macOS
+- **GCC** or **Clang** compiler
+- **Make** utility
+
+## Installation
+
+### Windows
+
+1. **Install a C compiler** (if not already installed):
+   - Download and install MinGW-w64 or MSYS2
+   - Add the compiler to your PATH environment variable
+
+2. **Build the project**:
+   ```cmd
+   cd c-version
+   build.bat
+   ```
+
+3. **Run the simulator**:
+   ```cmd
+   build\ternuino.exe
+   ```
+
+### Linux/macOS
+
+1. **Install GCC** (if not already installed):
+   ```bash
+   # Ubuntu/Debian
+   sudo apt update
+   sudo apt install gcc make
+   
+   # macOS (install Xcode Command Line Tools)
+   xcode-select --install
+   
+   # Or install via Homebrew
+   brew install gcc
+   ```
+
+2. **Build the project**:
+   ```bash
+   cd c-version
+   make
+   ```
+
+3. **Run the simulator**:
+   ```bash
+   ./build/ternuino
+   ```
+
+## Usage
+
+### Interactive Mode
+Run the simulator without arguments to enter interactive mode:
 
 ```bash
-python arithmetic_test.py
+./build/ternuino
 ```
 
-This will run comprehensive tests of the new arithmetic operations (SUB, MUL, DIV) and demonstrate the advantages of ternary arithmetic.
+This will:
+1. List all `.asm` files in the `programs/` directory
+2. Allow you to select a program to run
+3. Display the execution results
 
-### Hardware Visualizer (GUI)
-
-An interactive Tkinter GUI to visualize registers, memory, PC, and ternary logic:
+### Command Line Mode
+Run a specific program directly:
 
 ```bash
-python visualizer.py
+./build/ternuino path/to/program.asm
 ```
 
-Features:
-- Load existing programs from the `programs/` folder
-- Step through instructions or run continuously with adjustable speed
-- Watch registers and memory update live
-- Explore ternary logic (TAND, TOR, TNOT) and a conceptual ternary "transistor" indicator
+## Building from Source
 
-### Regenerating Documentation Images
+### Windows (Manual)
+```cmd
+gcc -Wall -Wextra -std=c99 -O2 -Iinclude -c src/*.c
+gcc *.o -o ternuino.exe
+```
+
+### Unix/Linux (Manual)
+```bash
+gcc -Wall -Wextra -std=c99 -O2 -Iinclude src/*.c -o ternuino
+```
+
+## Performance
+
+The C version provides significantly better performance compared to the Python version:
+- Faster program execution
+- Lower memory usage
+- Instant startup time
+- Better suited for larger programs and extended simulations
+
+## Compatibility
+
+This C implementation maintains full compatibility with the Python version:
+- Same assembly language syntax
+- Same instruction set
+- Same execution behavior
+- Same program output format
+
+You can use the same `.asm` program files with both versions.
+
+## Troubleshooting
+
+### "GCC not found" error on Windows
+- Install MinGW-w64 or MSYS2
+- Add the compiler's bin directory to your PATH environment variable
+- Restart your command prompt/terminal
+
+### Build errors
+- Ensure you have a C99-compatible compiler
+- Check that all header files are present in the `include/` directory
+- Verify that all source files are present in the `src/` directory
+
+### Runtime errors
+- Ensure the `programs/` directory exists
+- Check that your `.asm` files have correct syntax
+- Verify file permissions for reading assembly files
+
+## Example Programs
+
+Copy the `.asm` files from the parent `programs/` directory to test the simulator:
 
 ```bash
-python generate_diagrams.py
+# Copy example programs
+cp ../programs/*.asm programs/
+
+# Run a specific program
+./build/ternuino programs/fibonacci_demo.asm
 ```
 
-This will regenerate the architecture diagrams and comparison charts (requires matplotlib).
 
+### Assembly Programs
+Place your `.asm` assembly files in the `programs/` directory. The simulator supports all the same assembly language features as the Python version:
+
+- All arithmetic operations: `ADD`, `SUB`, `MUL`, `DIV`
+- Ternary logic: `TAND`, `TOR`, `TNOT`
+- Ternary arithmetic: `TSIGN`, `TABS`, `TSHL3`, `TSHR3`, `TCMPR`
+- Memory operations: `LD`, `ST`, `LEA` with `[A]`, `[B]`, `[C]` indirect addressing
+- Control flow: `JMP`, `TJZ`, `TJN`, `TJP`, `HLT`
+- Data sections with `.data`, `.word`, `.zero` directives
+- Labels for jumps and memory addresses
 
 ## Assembly Language
 
@@ -361,6 +449,7 @@ Ternary computers were actually built and used:
 
 - [x] Memory management instructions (LD/ST/LEA, .data/.text, [REG])
 - [x] Arithmetic operations (SUB, MUL, DIV)
+- [X] Change codebase to C
 - [ ] I/O operations
 - [ ] Interrupt handling
 - [x] Assembler for human-readable assembly language

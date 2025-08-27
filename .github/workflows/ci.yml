@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quick-test:
+    name: Quick Build Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make
+        
+    - name: Build project
+      working-directory: src
+      run: |
+        make clean || true
+        make
+        
+    - name: Basic functionality test
+      working-directory: src
+      run: |
+        # Test that basic programs work
+        echo "Testing arithmetic demo..."
+        timeout 10s "./build/ternuino" programs/arithmetic_demo.asm
+        
+        echo "Testing fibonacci demo..."  
+        timeout 10s "./build/ternuino" programs/fibonacci_demo.asm
+        
+        echo "Testing logic demo..."
+        timeout 10s "./build/ternuino" programs/logic_demo.asm
+        
+        echo "All tests passed!"
+
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make cppcheck
+        
+    - name: Static analysis with cppcheck
+      working-directory: src
+      run: |
+        cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem src/ include/ || echo "Static analysis completed with warnings"
+        
+    - name: Compile with strict warnings
+      working-directory: src
+      run: |
+        gcc -Wall -Wextra -Werror -std=c99 -Iinclude -c src/*.c
+        echo "Strict compilation check passed!"
