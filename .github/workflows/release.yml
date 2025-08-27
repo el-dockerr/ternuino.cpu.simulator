@@ -105,6 +105,7 @@ jobs:
         install: >-
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-make
+          make
           
     - name: Build (Linux/macOS)
       if: matrix.os != 'windows-latest'
@@ -119,8 +120,11 @@ jobs:
       shell: msys2 {0}
       run: |
         export PATH="/mingw64/bin:$PATH"
-        make clean || true
-        make
+        gcc --version
+        
+        # Use our GitHub Actions build script which doesn't require make
+        echo "Building with GitHub Actions script..."
+        cmd //c build-github.bat
         
     - name: Test executable
       working-directory: src
