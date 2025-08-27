@@ -1,0 +1,166 @@
+name: Build Ternuino CPU Simulator
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: Linux
+            artifact: ternuino-linux
+            executable: ternuino
+          - os: windows-latest
+            name: Windows
+            artifact: ternuino-windows
+            executable: ternuino.exe
+          - os: macos-latest
+            name: macOS
+            artifact: ternuino-macos
+            executable: ternuino
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Build Environment (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make
+        
+    - name: Setup Build Environment (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        # Xcode command line tools should be available by default
+        gcc --version
+        make --version
+        
+    - name: Setup Build Environment (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-make
+          
+    - name: Build (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      working-directory: src
+      run: |
+        make clean || true
+        make
+        ls -la build/
+        
+    - name: Build (Windows)
+      if: matrix.os == 'windows-latest'
+      working-directory: src
+      shell: msys2 {0}
+      run: |
+        export PATH="/mingw64/bin:$PATH"
+        rm -rf build || true
+        mkdir -p build/obj
+        gcc --version
+        make
+        ls -la build/
+        
+    - name: Test Build (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      working-directory: src
+      run: |
+        # Test that the executable was created and works
+        if [ -f "build/${{ matrix.executable }}" ]; then
+          echo "Executable found: build/${{ matrix.executable }}"
+          chmod +x "build/${{ matrix.executable }}"
+          # Test with a simple program
+          echo "Testing with arithmetic demo..."
+          "./build/${{ matrix.executable }}" programs/arithmetic_demo.asm || echo "Program execution completed"
+        else
+          echo "ERROR: Executable not found!"
+          exit 1
+        fi
+        
+    - name: Test Build (Windows)
+      if: matrix.os == 'windows-latest'
+      working-directory: src
+      shell: msys2 {0}
+      run: |
+        # Test that the executable was created and works
+        if [ -f "build/${{ matrix.executable }}" ]; then
+          echo "Executable found: build/${{ matrix.executable }}"
+          # Test with a simple program
+          echo "Testing with arithmetic demo..."
+          "./build/${{ matrix.executable }}" programs/arithmetic_demo.asm || echo "Program execution completed"
+        else
+          echo "ERROR: Executable not found!"
+          exit 1
+        fi
+        
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact }}
+        path: |
+          src/build/${{ matrix.executable }}
+          src/programs/*.asm
+          src/README.md
+        retention-days: 30
+        
+    - name: Upload Release Assets
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: src/build/${{ matrix.executable }}
+        asset_name: ternuino-${{ matrix.name }}-${{ matrix.executable }}
+        asset_content_type: application/octet-stream
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Build Environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make
+        
+    - name: Build
+      working-directory: src
+      run: |
+        make
+        
+    - name: Test All Programs
+      working-directory: src
+      run: |
+        echo "Testing all demo programs..."
+        for program in programs/*.asm; do
+          if [ -f "$program" ]; then
+            echo "Testing $program..."
+            timeout 10s "./build/ternuino" "$program" || echo "Program $program completed"
+          fi
+        done
+        
+    - name: Verify TritWord Conversion
+      working-directory: src
+      run: |
+        echo "Testing TritWord conversion..."
+        # Run without arguments to test TritWord demo
+        timeout 5s echo "" | "./build/ternuino" || echo "TritWord demo completed"

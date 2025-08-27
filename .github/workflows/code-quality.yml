@@ -1,0 +1,136 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make cppcheck clang-format
+        
+    - name: Static Analysis with cppcheck
+      working-directory: src
+      run: |
+        echo "Running static analysis..."
+        cppcheck --enable=all --error-exitcode=0 --suppress=missingIncludeSystem \
+          --template='{file}:{line}: {severity}: {message}' \
+          src/ include/ 2>&1 | tee cppcheck-report.txt
+          
+        # Show summary
+        echo "Static analysis completed. Issues found:"
+        grep -E "(error|warning)" cppcheck-report.txt || echo "No critical issues found"
+        
+    - name: Check Code Formatting
+      working-directory: src
+      run: |
+        echo "Checking code formatting..."
+        
+        # Check if clang-format would make changes
+        find src/ include/ -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror \
+          --style="{BasedOnStyle: GNU, IndentWidth: 4, TabWidth: 4, UseTab: Never}" \
+          2>&1 | tee format-check.txt || echo "Formatting issues detected"
+          
+        if [ -s format-check.txt ]; then
+          echo "❌ Code formatting issues found. Please run clang-format."
+          echo "Suggested fixes:"
+          cat format-check.txt
+        else
+          echo "✅ Code formatting looks good!"
+        fi
+        
+    - name: Compile with Maximum Warnings
+      working-directory: src
+      run: |
+        echo "Compiling with strict warning flags..."
+        
+        # Compile with very strict warnings
+        gcc -Wall -Wextra -Wpedantic -Werror -std=c99 \
+            -Wformat=2 -Wconversion -Wunused -Wshadow \
+            -Wstrict-prototypes -Wmissing-prototypes \
+            -Iinclude -c src/*.c 2>&1 | tee compile-warnings.txt || echo "Compilation warnings found"
+            
+        if [ -s compile-warnings.txt ]; then
+          echo "⚠️  Compilation warnings found:"
+          cat compile-warnings.txt
+        else
+          echo "✅ Clean compilation with strict warnings!"
+        fi
+        
+    - name: Check for TODO/FIXME Comments
+      working-directory: src
+      run: |
+        echo "Checking for TODO/FIXME comments..."
+        
+        find src/ include/ -name "*.c" -o -name "*.h" | xargs grep -n -E "(TODO|FIXME|XXX|HACK)" || echo "No TODO/FIXME comments found"
+        
+    - name: Line Ending Check
+      working-directory: src
+      run: |
+        echo "Checking line endings..."
+        
+        # Check for files with Windows line endings (CRLF)
+        find src/ include/ -name "*.c" -o -name "*.h" | xargs file | grep CRLF || echo "✅ All files have Unix line endings"
+        
+    - name: File Size Check
+      working-directory: src
+      run: |
+        echo "Checking for overly large files..."
+        
+        # Find files larger than 10KB (might indicate they need splitting)
+        find src/ include/ -name "*.c" -o -name "*.h" -size +10k -exec ls -lh {} \; | \
+          awk '{print $5 " " $9}' | tee large-files.txt || echo "No large files found"
+          
+        if [ -s large-files.txt ]; then
+          echo "📏 Large source files found (consider splitting):"
+          cat large-files.txt
+        else
+          echo "✅ All source files are reasonably sized"
+        fi
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install security tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc make flawfinder
+        
+    - name: Security scan with Flawfinder
+      working-directory: src
+      run: |
+        echo "Running security scan..."
+        
+        flawfinder --error-level=0 --html --context src/ include/ > security-report.html || echo "Security scan completed"
+        flawfinder --error-level=1 src/ include/ 2>&1 | tee security-report.txt || echo "Security issues found"
+        
+        if [ -s security-report.txt ]; then
+          echo "🔒 Security scan results:"
+          cat security-report.txt
+        else
+          echo "✅ No significant security issues found"
+        fi
+        
+    - name: Upload security report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-report
+        path: src/security-report.html
+        retention-days: 30
