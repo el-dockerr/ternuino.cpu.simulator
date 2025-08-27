@@ -75,10 +75,10 @@ jobs:
       shell: bash
       run: |
         if [ -f "build/${{ matrix.executable }}" ]; then
-          echo "✅ Executable built successfully: build/${{ matrix.executable }}"
+          echo "Executable built successfully: build/${{ matrix.executable }}"
           ls -la "build/${{ matrix.executable }}"
         else
-          echo "❌ Executable not found!"
+          echo "Executable not found!"
           exit 1
         fi
         
