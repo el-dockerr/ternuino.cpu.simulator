@@ -5,8 +5,10 @@ on:
     branches: [ main, develop, feature/* ]
   pull_request:
     branches: [ main, develop ]
-  release:
-    types: [ created ]
+
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   build:
@@ -120,17 +122,6 @@ jobs:
           src/programs/*.asm
           src/README.md
         retention-days: 30
-        
-    - name: Upload Release Assets
-      if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: src/build/${{ matrix.executable }}
-        asset_name: ternuino-${{ matrix.name }}-${{ matrix.executable }}
-        asset_content_type: application/octet-stream
 
   test:
     name: Run Tests
