@@ -12,7 +12,7 @@ BUILDDIR = build
 OBJDIR = $(BUILDDIR)/obj
 
 # Source files (excluding utilities)
-MAIN_SOURCES = $(SRCDIR)/main.c $(SRCDIR)/ternuino.c $(SRCDIR)/assembler.c $(SRCDIR)/tritlogic.c $(SRCDIR)/tritarith.c $(SRCDIR)/tritword.c $(SRCDIR)/ternio.c
+MAIN_SOURCES = $(SRCDIR)/main.c $(SRCDIR)/ternuino.c $(SRCDIR)/assembler.c $(SRCDIR)/tritlogic.c $(SRCDIR)/tritarith.c $(SRCDIR)/tritword.c $(SRCDIR)/ternio.c $(SRCDIR)/devices.c
 MAIN_OBJECTS = $(MAIN_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 # Utility sources
@@ -88,11 +88,12 @@ t3reader: $(T3READER)
 .PHONY: all clean install run test help t3reader
 
 # Dependencies (header files)
-$(OBJDIR)/main.o: $(INCDIR)/ternuino.h $(INCDIR)/assembler.h $(INCDIR)/tritword.h
-$(OBJDIR)/ternuino.o: $(INCDIR)/ternuino.h $(INCDIR)/tritlogic.h $(INCDIR)/tritarith.h $(INCDIR)/ternio.h
+$(OBJDIR)/main.o: $(INCDIR)/ternuino.h $(INCDIR)/assembler.h $(INCDIR)/tritword.h $(INCDIR)/devices.h
+$(OBJDIR)/ternuino.o: $(INCDIR)/ternuino.h $(INCDIR)/tritlogic.h $(INCDIR)/tritarith.h $(INCDIR)/ternio.h $(INCDIR)/devices.h
 $(OBJDIR)/assembler.o: $(INCDIR)/assembler.h $(INCDIR)/ternuino.h
 $(OBJDIR)/tritlogic.o: $(INCDIR)/tritlogic.h
 $(OBJDIR)/tritarith.o: $(INCDIR)/tritarith.h
 $(OBJDIR)/tritword.o: $(INCDIR)/tritword.h
 $(OBJDIR)/ternio.o: $(INCDIR)/ternio.h
+$(OBJDIR)/devices.o: $(INCDIR)/devices.h $(INCDIR)/ternuino.h $(INCDIR)/ternio.h
 $(OBJDIR)/t3reader.o: $(INCDIR)/ternio.h

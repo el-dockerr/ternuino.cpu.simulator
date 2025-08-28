@@ -5,12 +5,17 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+// Forward declarations
+struct device_s;
+
 // Ternary values: -1, 0, 1
 typedef int8_t trit_t;
 
 #define MAX_MEMORY_SIZE 27
 #define MAX_DATA_MEMORY_SIZE 27
 #define MAX_OPEN_FILES 8
+#define MAX_DEVICES 8
+#define MAX_IRQ_VECTORS 8
 
 // File handle structure for I/O operations
 typedef struct {
@@ -45,10 +50,14 @@ typedef enum {
     OP_TJZ,
     OP_TJN,
     OP_TJP,
-    OP_TOPEN,  // Open file for I/O
-    OP_TREAD,  // Read from file
-    OP_TWRITE, // Write to file
-    OP_TCLOSE  // Close file
+    OP_TOPEN,  // Open device for I/O
+    OP_TREAD,  // Read from device
+    OP_TWRITE, // Write to device
+    OP_TCLOSE, // Close device
+    OP_IRQ,    // Software interrupt
+    OP_IRET,   // Return from interrupt
+    OP_EI,     // Enable interrupts
+    OP_DI      // Disable interrupts
 } opcode_t;
 
 // Addressing modes
@@ -85,16 +94,32 @@ typedef struct {
     bool has_operand2;
 } instruction_t;
 
-// CPU state structure
+// Interrupt vector table entry
 typedef struct {
+    int32_t handler_address;
+    bool enabled;
+} irq_entry_t;
+
+// CPU state structure
+typedef struct ternuino_s {
     int32_t registers[3];  // A, B, C
     int32_t pc;            // Program counter
+    int32_t sp;            // Stack pointer (for interrupt handling)
     bool running;          // CPU running state
+    bool interrupts_enabled; // Global interrupt enable flag
+    bool in_interrupt;     // Currently handling interrupt
     instruction_t memory[MAX_MEMORY_SIZE];  // Instruction memory
     int32_t data_mem[MAX_DATA_MEMORY_SIZE]; // Data memory
     int32_t dmem_size;     // Actual data memory size
     bool memory_valid[MAX_MEMORY_SIZE];     // Track which memory slots have valid instructions
-    tfile_t files[MAX_OPEN_FILES];          // File handles for I/O operations
+    tfile_t files[MAX_OPEN_FILES];          // File handles for I/O operations (legacy)
+    
+    // Interrupt and device management
+    irq_entry_t irq_table[MAX_IRQ_VECTORS]; // Interrupt vector table
+    struct device_s *devices[MAX_DEVICES];  // Device array
+    int32_t device_count;                   // Number of registered devices
+    int32_t pending_irq;                    // Pending interrupt vector (-1 if none)
+    int32_t saved_pc;                       // Saved PC for interrupt return
 } ternuino_t;
 
 // Core CPU functions
@@ -104,6 +129,19 @@ void ternuino_load_program(ternuino_t *cpu, instruction_t *program, int32_t prog
                           int32_t *data, int32_t data_size);
 void ternuino_step(ternuino_t *cpu);
 void ternuino_run(ternuino_t *cpu);
+
+// Interrupt handling functions
+void ternuino_set_irq_handler(ternuino_t *cpu, int32_t vector, int32_t handler_address);
+void ternuino_enable_irq(ternuino_t *cpu, int32_t vector);
+void ternuino_disable_irq(ternuino_t *cpu, int32_t vector);
+void ternuino_trigger_irq(ternuino_t *cpu, int32_t vector);
+void ternuino_check_interrupts(ternuino_t *cpu);
+
+// Device management functions
+int32_t ternuino_register_device(ternuino_t *cpu, struct device_s *device);
+void ternuino_unregister_device(ternuino_t *cpu, int32_t device_id);
+struct device_s* ternuino_get_device(ternuino_t *cpu, int32_t device_id);
+void ternuino_tick_devices(ternuino_t *cpu);
 
 // Helper functions
 const char* opcode_to_string(opcode_t opcode);

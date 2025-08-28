@@ -86,6 +86,10 @@ opcode_t string_to_opcode(const char *str) {
     if (strcmp(str, "TREAD") == 0) return OP_TREAD;
     if (strcmp(str, "TWRITE") == 0) return OP_TWRITE;
     if (strcmp(str, "TCLOSE") == 0) return OP_TCLOSE;
+    if (strcmp(str, "IRQ") == 0) return OP_IRQ;
+    if (strcmp(str, "IRET") == 0) return OP_IRET;
+    if (strcmp(str, "EI") == 0) return OP_EI;
+    if (strcmp(str, "DI") == 0) return OP_DI;
     return OP_NOP;  // Default for unknown opcodes
 }
 
@@ -275,6 +279,9 @@ bool parse_instruction_line(assembler_t *asm_state, const char *line,
     switch (opcode) {
         case OP_NOP:
         case OP_HLT:
+        case OP_IRET:
+        case OP_EI:
+        case OP_DI:
             // No operands
             break;
             
@@ -285,6 +292,8 @@ bool parse_instruction_line(assembler_t *asm_state, const char *line,
         case OP_TSHL3:
         case OP_TSHR3:
         case OP_JMP:
+        case OP_IRQ:
+        case OP_TCLOSE:
             // One operand
             if (token_count < 2) {
                 printf("Error: '%s' expects 1 argument\n", tokens[0]);
@@ -308,6 +317,9 @@ bool parse_instruction_line(assembler_t *asm_state, const char *line,
         case OP_LD:
         case OP_ST:
         case OP_LEA:
+        case OP_TOPEN:
+        case OP_TREAD:
+        case OP_TWRITE:
             // Two operands
             if (token_count < 3) {
                 printf("Error: '%s' expects 2 arguments\n", tokens[0]);

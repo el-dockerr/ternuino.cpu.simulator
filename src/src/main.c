@@ -5,6 +5,7 @@
 #include "ternuino.h"
 #include "assembler.h"
 #include "tritword.h"
+#include "devices.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -64,6 +65,23 @@ bool run_program_file(const char *filename) {
     // Create and run the CPU
     ternuino_t cpu;
     ternuino_init(&cpu, MAX_DATA_MEMORY_SIZE);
+    
+    // Set up devices
+    device_t *terminal = terminal_device_create(0, 0); // Device ID 0, IRQ vector 0
+    device_t *file_dev = file_device_create(1, 1);     // Device ID 1, IRQ vector 1
+    
+    if (terminal) {
+        ternuino_register_device(&cpu, terminal);
+        ternuino_set_irq_handler(&cpu, 0, 25); // Set IRQ handler at address 25 for terminal
+        printf("Terminal device registered (ID: 0, IRQ vector: 0)\n");
+    }
+    
+    if (file_dev) {
+        ternuino_register_device(&cpu, file_dev);
+        ternuino_set_irq_handler(&cpu, 1, 26); // Set IRQ handler at address 26 for file
+        printf("File device registered (ID: 1, IRQ vector: 1)\n");
+    }
+    
     ternuino_load_program(&cpu, program, program_size, assembler.data_image, assembler.data_size);
     
     printf("Initial registers: ");
@@ -80,6 +98,15 @@ bool run_program_file(const char *filename) {
     if (assembler.data_size > 0) {
         print_data_memory(&cpu, 9);
     }
+    
+    // Clean up devices
+    for (int i = 0; i < cpu.device_count; i++) {
+        if (cpu.devices[i]) {
+            device_cleanup(cpu.devices[i]);
+            free(cpu.devices[i]);
+        }
+    }
+    
     printf("\n");
     
     return true;
