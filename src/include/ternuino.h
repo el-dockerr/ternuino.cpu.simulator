@@ -3,13 +3,22 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 // Ternary values: -1, 0, 1
 typedef int8_t trit_t;
 
-// Maximum memory and data memory sizes
 #define MAX_MEMORY_SIZE 27
 #define MAX_DATA_MEMORY_SIZE 27
+#define MAX_OPEN_FILES 8
+
+// File handle structure for I/O operations
+typedef struct {
+    FILE *file;
+    char filename[256];
+    bool is_open;
+    bool is_write_mode;
+} tfile_t;
 
 // Instruction types
 typedef enum {
@@ -35,7 +44,11 @@ typedef enum {
     OP_TCMPR,
     OP_TJZ,
     OP_TJN,
-    OP_TJP
+    OP_TJP,
+    OP_TOPEN,  // Open file for I/O
+    OP_TREAD,  // Read from file
+    OP_TWRITE, // Write to file
+    OP_TCLOSE  // Close file
 } opcode_t;
 
 // Addressing modes
@@ -81,6 +94,7 @@ typedef struct {
     int32_t data_mem[MAX_DATA_MEMORY_SIZE]; // Data memory
     int32_t dmem_size;     // Actual data memory size
     bool memory_valid[MAX_MEMORY_SIZE];     // Track which memory slots have valid instructions
+    tfile_t files[MAX_OPEN_FILES];          // File handles for I/O operations
 } ternuino_t;
 
 // Core CPU functions

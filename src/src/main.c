@@ -155,20 +155,6 @@ void interactive_mode(void) {
     }
 }
 
-void demonstrate_tritword(void) {
-    printf("\n=== Ternary Number Conversion Demo ===\n");
-    
-    for (int i = 0; i < 10; i++) {
-        tritword_t tw;
-        tritword_from_int(&tw, i, TRITWORD_SIZE);
-        
-        char buffer[TRITWORD_SIZE + 1];
-        tritword_to_string(&tw, buffer, sizeof(buffer));
-        
-        printf("%d in ternary: %s\n", i, buffer);
-    }
-}
-
 int main(int argc, char *argv[]) {
     // Check command line arguments
     if (argc > 1) {
@@ -178,9 +164,6 @@ int main(int argc, char *argv[]) {
         // Interactive mode
         interactive_mode();
     }
-    
-    // Demonstrate TritWord functionality
-    demonstrate_tritword();
     
     return 0;
 }

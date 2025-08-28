@@ -74,8 +74,9 @@ help:
 
 # Dependencies (header files)
 $(OBJDIR)/main.o: $(INCDIR)/ternuino.h $(INCDIR)/assembler.h $(INCDIR)/tritword.h
-$(OBJDIR)/ternuino.o: $(INCDIR)/ternuino.h $(INCDIR)/tritlogic.h $(INCDIR)/tritarith.h
+$(OBJDIR)/ternuino.o: $(INCDIR)/ternuino.h $(INCDIR)/tritlogic.h $(INCDIR)/tritarith.h $(INCDIR)/ternio.h
 $(OBJDIR)/assembler.o: $(INCDIR)/assembler.h $(INCDIR)/ternuino.h
 $(OBJDIR)/tritlogic.o: $(INCDIR)/tritlogic.h
 $(OBJDIR)/tritarith.o: $(INCDIR)/tritarith.h
 $(OBJDIR)/tritword.o: $(INCDIR)/tritword.h
+$(OBJDIR)/ternio.o: $(INCDIR)/ternio.h

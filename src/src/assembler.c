@@ -82,6 +82,10 @@ opcode_t string_to_opcode(const char *str) {
     if (strcmp(str, "TJZ") == 0) return OP_TJZ;
     if (strcmp(str, "TJN") == 0) return OP_TJN;
     if (strcmp(str, "TJP") == 0) return OP_TJP;
+    if (strcmp(str, "TOPEN") == 0) return OP_TOPEN;
+    if (strcmp(str, "TREAD") == 0) return OP_TREAD;
+    if (strcmp(str, "TWRITE") == 0) return OP_TWRITE;
+    if (strcmp(str, "TCLOSE") == 0) return OP_TCLOSE;
     return OP_NOP;  // Default for unknown opcodes
 }
 

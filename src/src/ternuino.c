@@ -1,6 +1,7 @@
 #include "ternuino.h"
 #include "tritlogic.h"
 #include "tritarith.h"
+#include "ternio.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -19,6 +20,14 @@ void ternuino_init(ternuino_t *cpu, int32_t dmem_size) {
     memset(cpu->memory, 0, sizeof(cpu->memory));
     memset(cpu->data_mem, 0, sizeof(cpu->data_mem));
     memset(cpu->memory_valid, false, sizeof(cpu->memory_valid));
+    
+    // Initialize file handles
+    for (int i = 0; i < MAX_OPEN_FILES; i++) {
+        cpu->files[i].file = NULL;
+        cpu->files[i].filename[0] = '\0';
+        cpu->files[i].is_open = false;
+        cpu->files[i].is_write_mode = false;
+    }
 }
 
 void ternuino_reset(ternuino_t *cpu) {
@@ -263,6 +272,97 @@ void ternuino_step(ternuino_t *cpu) {
             }
             break;
         }
+        
+        case OP_TOPEN: {
+            // TOPEN file_id, mode  (mode: 0=read, 1=write)
+            int32_t file_id = resolve_operand_value(cpu, &instr->operand1);
+            int32_t mode = resolve_operand_value(cpu, &instr->operand2);
+            
+            if (file_id >= 0 && file_id < MAX_OPEN_FILES) {
+                if (cpu->files[file_id].is_open) {
+                    fclose(cpu->files[file_id].file);
+                }
+                
+                // Generate filename based on file_id
+                snprintf(cpu->files[file_id].filename, sizeof(cpu->files[file_id].filename), 
+                        "ternary_%d.t3", file_id);
+                
+                const char* file_mode = (mode == 0) ? "rb" : "wb";
+                cpu->files[file_id].file = fopen(cpu->files[file_id].filename, file_mode);
+                cpu->files[file_id].is_open = (cpu->files[file_id].file != NULL);
+                cpu->files[file_id].is_write_mode = (mode != 0);
+                
+                // Set result in register A (0=success, -1=error)
+                cpu->registers[REG_A] = cpu->files[file_id].is_open ? 0 : -1;
+                
+                // If writing, create header
+                if (cpu->files[file_id].is_open && cpu->files[file_id].is_write_mode) {
+                    t3_write_header(cpu->files[file_id].file, 0);
+                }
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid file ID
+            }
+            break;
+        }
+        
+        case OP_TREAD: {
+            // TREAD file_id, register
+            int32_t file_id = resolve_operand_value(cpu, &instr->operand1);
+            
+            if (file_id >= 0 && file_id < MAX_OPEN_FILES && 
+                cpu->files[file_id].is_open && !cpu->files[file_id].is_write_mode) {
+                
+                int32_t value;
+                if (t3_read_value(cpu->files[file_id].file, &value)) {
+                    if (instr->operand2.mode == ADDR_REGISTER) {
+                        cpu->registers[instr->operand2.value.reg] = value;
+                        cpu->registers[REG_A] = 0; // Success
+                    } else {
+                        cpu->registers[REG_A] = -1; // Invalid target
+                    }
+                } else {
+                    cpu->registers[REG_A] = -1; // Read error or EOF
+                }
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid file or not open for reading
+            }
+            break;
+        }
+        
+        case OP_TWRITE: {
+            // TWRITE file_id, value_source
+            int32_t file_id = resolve_operand_value(cpu, &instr->operand1);
+            int32_t value = resolve_operand_value(cpu, &instr->operand2);
+            
+            if (file_id >= 0 && file_id < MAX_OPEN_FILES && 
+                cpu->files[file_id].is_open && cpu->files[file_id].is_write_mode) {
+                
+                if (t3_write_value(cpu->files[file_id].file, value)) {
+                    cpu->registers[REG_A] = 0; // Success
+                } else {
+                    cpu->registers[REG_A] = -1; // Write error
+                }
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid file or not open for writing
+            }
+            break;
+        }
+        
+        case OP_TCLOSE: {
+            // TCLOSE file_id
+            int32_t file_id = resolve_operand_value(cpu, &instr->operand1);
+            
+            if (file_id >= 0 && file_id < MAX_OPEN_FILES && cpu->files[file_id].is_open) {
+                fclose(cpu->files[file_id].file);
+                cpu->files[file_id].file = NULL;
+                cpu->files[file_id].is_open = false;
+                cpu->files[file_id].filename[0] = '\0';
+                cpu->registers[REG_A] = 0; // Success
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid file or not open
+            }
+            break;
+        }
     }
 }
 
@@ -297,6 +397,10 @@ const char* opcode_to_string(opcode_t opcode) {
         case OP_TJZ:   return "TJZ";
         case OP_TJN:   return "TJN";
         case OP_TJP:   return "TJP";
+        case OP_TOPEN: return "TOPEN";
+        case OP_TREAD: return "TREAD";
+        case OP_TWRITE: return "TWRITE";
+        case OP_TCLOSE: return "TCLOSE";
         default:       return "UNKNOWN";
     }
 }
