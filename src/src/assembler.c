@@ -50,32 +50,12 @@ static bool add_label(assembler_t *asm_state, const char *name, int32_t address,
         }
     }
     
-    strncpy(asm_state->labels[asm_state->label_count].name, name, MAX_LABEL_LENGTH - 1);
-    asm_state->labels[asm_state->label_count].name[MAX_LABEL_LENGTH - 1] = '\0';
+    snprintf(asm_state->labels[asm_state->label_count].name, MAX_LABEL_LENGTH, "%s", name);
     asm_state->labels[asm_state->label_count].address = address;
     asm_state->labels[asm_state->label_count].is_data_label = is_data;
     asm_state->label_count++;
     
     return true;
-}
-
-static int32_t find_label(assembler_t *asm_state, const char *name, bool prefer_data) {
-    // First pass: look for exact match with preferred type
-    for (int i = 0; i < asm_state->label_count; i++) {
-        if (strcmp(asm_state->labels[i].name, name) == 0 && 
-            asm_state->labels[i].is_data_label == prefer_data) {
-            return asm_state->labels[i].address;
-        }
-    }
-    
-    // Second pass: look for any match
-    for (int i = 0; i < asm_state->label_count; i++) {
-        if (strcmp(asm_state->labels[i].name, name) == 0) {
-            return asm_state->labels[i].address;
-        }
-    }
-    
-    return -1;  // Not found
 }
 
 opcode_t string_to_opcode(const char *str) {
