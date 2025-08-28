@@ -56,6 +56,10 @@ echo   Compiling src\ternio.c...
 %CC% %CFLAGS% -c src\ternio.c -o build\obj\ternio.o
 if !errorlevel! neq 0 exit /b 1
 
+echo   Compiling src\devices.c...
+%CC% %CFLAGS% -c src\devices.c -o build\obj\devices.o
+if !errorlevel! neq 0 exit /b 1
+
 echo Linking executable...
 %CC% build\obj\*.o -o %TARGET%
 if !errorlevel! neq 0 exit /b 1

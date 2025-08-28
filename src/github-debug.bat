@@ -49,6 +49,18 @@ if errorlevel 1 (
     exit /b 1
 )
 
+gcc -Wall -Wextra -std=c99 -g -O0 -Iinclude -c src/ternio.c -o build/obj/ternio.o
+if errorlevel 1 (
+    echo Error compiling ternio.c
+    exit /b 1
+)
+
+gcc -Wall -Wextra -std=c99 -g -O0 -Iinclude -c src/devices.c -o build/obj/devices.o
+if errorlevel 1 (
+    echo Error compiling devices.c
+    exit /b 1
+)
+
 echo Linking executable...
 
 REM Link all object files into the final executable
