@@ -454,8 +454,8 @@ Ternary computers were actually built and used:
 - [x] Memory management instructions (LD/ST/LEA, .data/.text, [REG])
 - [x] Arithmetic operations (SUB, MUL, DIV)
 - [X] Change codebase to C
-- [ ] I/O operations
-- [ ] Interrupt handling
+- [X] I/O operations
+- [X] Interrupt handling
 - [x] Assembler for human-readable assembly language
 - [ ] Debugger with step-by-step execution
 - [ ] Performance comparison tools vs. binary systems
