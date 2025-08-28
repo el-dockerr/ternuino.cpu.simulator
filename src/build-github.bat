@@ -52,6 +52,10 @@ echo   Compiling src\tritword.c...
 %CC% %CFLAGS% -c src\tritword.c -o build\obj\tritword.o
 if !errorlevel! neq 0 exit /b 1
 
+echo   Compiling src\ternio.c...
+%CC% %CFLAGS% -c src\ternio.c -o build\obj\ternio.o
+if !errorlevel! neq 0 exit /b 1
+
 echo Linking executable...
 %CC% build\obj\*.o -o %TARGET%
 if !errorlevel! neq 0 exit /b 1
