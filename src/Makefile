@@ -11,25 +11,36 @@ INCDIR = include
 BUILDDIR = build
 OBJDIR = $(BUILDDIR)/obj
 
-# Source files
-SOURCES = $(wildcard $(SRCDIR)/*.c)
-OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+# Source files (excluding utilities)
+MAIN_SOURCES = $(SRCDIR)/main.c $(SRCDIR)/ternuino.c $(SRCDIR)/assembler.c $(SRCDIR)/tritlogic.c $(SRCDIR)/tritarith.c $(SRCDIR)/tritword.c $(SRCDIR)/ternio.c $(SRCDIR)/devices.c
+MAIN_OBJECTS = $(MAIN_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
-# Target executable
+# Utility sources
+UTIL_SOURCES = $(SRCDIR)/t3reader.c $(SRCDIR)/ternio.c
+T3READER_OBJECTS = $(OBJDIR)/t3reader.o $(OBJDIR)/ternio.o
+
+# Target executables
 TARGET = $(BUILDDIR)/ternuino
+T3READER = $(BUILDDIR)/t3reader
 
 # Default target
-all: $(TARGET)
+all: $(TARGET) $(T3READER)
 
 # Create build directories
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
 
 # Build the main executable
-$(TARGET): $(OBJECTS) | $(OBJDIR)
+$(TARGET): $(MAIN_OBJECTS) | $(OBJDIR)
 	@mkdir -p $(BUILDDIR)
-	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+	$(CC) $(MAIN_OBJECTS) -o $@ $(LDFLAGS)
 	@echo "Built $(TARGET)"
+
+# Build the T3 reader utility
+$(T3READER): $(T3READER_OBJECTS) | $(OBJDIR)
+	@mkdir -p $(BUILDDIR)
+	$(CC) $(T3READER_OBJECTS) -o $@ $(LDFLAGS)
+	@echo "Built $(T3READER)"
 
 # Compile source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
@@ -67,15 +78,22 @@ help:
 	@echo "  clean   - Remove build files"
 	@echo "  run     - Run the program in interactive mode"
 	@echo "  test    - Run all test programs"
+	@echo "  t3reader- Build T3 file reader utility"
 	@echo "  install - Install to system PATH"
 	@echo "  help    - Show this help message"
 
-.PHONY: all clean install run test help
+# Build only the T3 reader utility
+t3reader: $(T3READER)
+
+.PHONY: all clean install run test help t3reader
 
 # Dependencies (header files)
-$(OBJDIR)/main.o: $(INCDIR)/ternuino.h $(INCDIR)/assembler.h $(INCDIR)/tritword.h
-$(OBJDIR)/ternuino.o: $(INCDIR)/ternuino.h $(INCDIR)/tritlogic.h $(INCDIR)/tritarith.h
+$(OBJDIR)/main.o: $(INCDIR)/ternuino.h $(INCDIR)/assembler.h $(INCDIR)/tritword.h $(INCDIR)/devices.h
+$(OBJDIR)/ternuino.o: $(INCDIR)/ternuino.h $(INCDIR)/tritlogic.h $(INCDIR)/tritarith.h $(INCDIR)/ternio.h $(INCDIR)/devices.h
 $(OBJDIR)/assembler.o: $(INCDIR)/assembler.h $(INCDIR)/ternuino.h
 $(OBJDIR)/tritlogic.o: $(INCDIR)/tritlogic.h
 $(OBJDIR)/tritarith.o: $(INCDIR)/tritarith.h
 $(OBJDIR)/tritword.o: $(INCDIR)/tritword.h
+$(OBJDIR)/ternio.o: $(INCDIR)/ternio.h
+$(OBJDIR)/devices.o: $(INCDIR)/devices.h $(INCDIR)/ternuino.h $(INCDIR)/ternio.h
+$(OBJDIR)/t3reader.o: $(INCDIR)/ternio.h

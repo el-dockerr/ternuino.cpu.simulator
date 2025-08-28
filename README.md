@@ -3,7 +3,7 @@
 
 ![Ternuino CPU Wallpaper](assets/ternuino_wallpaper.png)
 
-A ternary (base-3) CPU simulator that demonstrates the advantages of three-state logic over traditional binary systems.
+A ternary (base-3) CPU simulator that demonstrates the advantages of three-state logic over traditional binary systems. It is the virtual Simulation of a planned small Computer that will be build by myself.
 The Ternuino CPU uses trits (ternary digits) with values of -1, 0, and +1 instead of binary bits (0, 1).
 This program was written by Swen "El Dockerr" Kalski (me) and is in active development. This Repository also contains a beginner friendly introduction of ternary computing what is part of my bachelor thesis in mathematics. 
 
@@ -11,7 +11,7 @@ A friendly, beginner‑oriented guide lives in [`docs/book/`](docs/book/README.m
 
 For CPU Design I already have a CPU Design tool in place: [ternuino.cpu.visual-desinger](https://github.com/el-dockerr/ternuino.cpu.visual-desinger)*
 
-*yepp - there is a type. But at least this can be happen. Did you now, that Commodore did these when the build up the 8-bit systems (VIC 20 / C64 ...). They wrote Kernal instead of Kernel. And Google was a typo too. That's a good sign for the future of this project.
+*yepp - there is a typo. But at least this can be happen. Did you now, that Commodore did these when the build up the 8-bit systems (VIC 20 / C64 ...). They wrote Kernal instead of Kernel. And Google was a typo too. That's a good sign for the future of this project.
 
 
 ```
@@ -50,6 +50,10 @@ A friendly, beginner‑oriented guide lives in `docs/book/`.
 
 - Start at `docs/book/README.md`
 - Chapters cover ternary numbers, logic, TritWord, CPU architecture, assembly, examples, the visualizer, and an FAQ.
+
+## Assembly Language Documentations
+- General Ternuino Assembly [`ASSEMBLY.md`](ASSEMBLY.md)
+- I/O Operations with Ternuino Assembly [`IO_OPERATIONS.md`](IO_OPERATIONS.md)
 
 ## Key Advantages of Ternary Over Binary Systems
 
@@ -450,8 +454,8 @@ Ternary computers were actually built and used:
 - [x] Memory management instructions (LD/ST/LEA, .data/.text, [REG])
 - [x] Arithmetic operations (SUB, MUL, DIV)
 - [X] Change codebase to C
-- [ ] I/O operations
-- [ ] Interrupt handling
+- [X] I/O operations
+- [X] Interrupt handling
 - [x] Assembler for human-readable assembly language
 - [ ] Debugger with step-by-step execution
 - [ ] Performance comparison tools vs. binary systems

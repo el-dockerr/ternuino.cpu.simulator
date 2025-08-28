@@ -46,7 +46,7 @@ if not exist "build\obj" mkdir build\obj
 REM Compiler settings
 set CC=gcc
 set CFLAGS=-Wall -Wextra -std=c99 -O2 -Iinclude
-set SOURCES=src\main.c src\ternuino.c src\assembler.c src\tritlogic.c src\tritarith.c src\tritword.c
+set SOURCES=src\main.c src\ternuino.c src\assembler.c src\tritlogic.c src\tritarith.c src\tritword.c src\ternio.c src\devices.c
 set TARGET=build\ternuino.exe
 
 echo Building Ternuino CPU Simulator...
