@@ -8,8 +8,10 @@ void assembler_init(assembler_t *asm_state) {
     asm_state->label_count = 0;
     asm_state->data_size = 0;
     asm_state->in_data_section = false;
+    asm_state->unresolved_count = 0;
     memset(asm_state->labels, 0, sizeof(asm_state->labels));
     memset(asm_state->data_image, 0, sizeof(asm_state->data_image));
+    memset(asm_state->unresolved_refs, 0, sizeof(asm_state->unresolved_refs));
 }
 
 static void trim_string(char *str) {
@@ -114,6 +116,58 @@ bool is_indirect_operand(const char *str, char *reg_name) {
     return false;
 }
 
+static bool add_unresolved_ref(assembler_t *asm_state, const char *label_name, 
+                              int32_t instruction_address, int32_t operand_number) {
+    if (asm_state->unresolved_count >= MAX_UNRESOLVED_REFS) {
+        printf("Error: Too many unresolved label references\n");
+        return false;
+    }
+    
+    unresolved_ref_t *ref = &asm_state->unresolved_refs[asm_state->unresolved_count];
+    strncpy(ref->label_name, label_name, MAX_LABEL_LENGTH - 1);
+    ref->label_name[MAX_LABEL_LENGTH - 1] = '\0';
+    ref->instruction_address = instruction_address;
+    ref->operand_number = operand_number;
+    asm_state->unresolved_count++;
+    
+    return true;
+}
+
+bool parse_operand_with_labels(assembler_t *asm_state, const char *token, operand_t *operand, 
+                              int32_t instruction_address, int32_t operand_number) {
+    char reg_name[4];
+    
+    // Check for indirect addressing [A], [B], [C]
+    if (is_indirect_operand(token, reg_name)) {
+        operand->mode = ADDR_INDIRECT;
+        operand->value.reg = string_to_register(reg_name);
+        return true;
+    }
+    
+    // Check for register
+    if (is_valid_register(token)) {
+        operand->mode = ADDR_REGISTER;
+        operand->value.reg = string_to_register(token);
+        return true;
+    }
+    
+    // Check for immediate integer
+    char *endptr;
+    long val = strtol(token, &endptr, 10);
+    if (*endptr == '\0') {
+        operand->mode = ADDR_IMMEDIATE;
+        operand->value.immediate = (int32_t)val;
+        return true;
+    }
+    
+    // Otherwise, it's a label - record it for later resolution
+    operand->mode = ADDR_DIRECT;
+    operand->value.address = -1;  // Mark as unresolved
+    
+    // Add to unresolved references
+    return add_unresolved_ref(asm_state, token, instruction_address, operand_number);
+}
+
 bool parse_operand(const char *token, operand_t *operand) {
     char reg_name[4];
     
@@ -202,7 +256,7 @@ static bool parse_data_directive(assembler_t *asm_state, char *line, const char 
 }
 
 bool parse_instruction_line(assembler_t *asm_state, const char *line, 
-                           instruction_t *instr, bool *has_instruction) {
+                           instruction_t *instr, bool *has_instruction, int32_t instruction_address) {
     char working_line[MAX_LINE_LENGTH];
     strncpy(working_line, line, MAX_LINE_LENGTH - 1);
     working_line[MAX_LINE_LENGTH - 1] = '\0';
@@ -299,7 +353,7 @@ bool parse_instruction_line(assembler_t *asm_state, const char *line,
                 printf("Error: '%s' expects 1 argument\n", tokens[0]);
                 return false;
             }
-            parse_operand(tokens[1], &instr->operand1);
+            parse_operand_with_labels(asm_state, tokens[1], &instr->operand1, instruction_address, 1);
             instr->has_operand1 = true;
             break;
             
@@ -325,8 +379,8 @@ bool parse_instruction_line(assembler_t *asm_state, const char *line,
                 printf("Error: '%s' expects 2 arguments\n", tokens[0]);
                 return false;
             }
-            parse_operand(tokens[1], &instr->operand1);
-            parse_operand(tokens[2], &instr->operand2);
+            parse_operand_with_labels(asm_state, tokens[1], &instr->operand1, instruction_address, 1);
+            parse_operand_with_labels(asm_state, tokens[2], &instr->operand2, instruction_address, 2);
             instr->has_operand1 = true;
             instr->has_operand2 = true;
             break;
@@ -337,28 +391,39 @@ bool parse_instruction_line(assembler_t *asm_state, const char *line,
 }
 
 bool resolve_labels(assembler_t *asm_state, instruction_t *program, int32_t program_size) {
-    (void)asm_state; // Suppress unused parameter warning
+    bool success = true;
     
-    for (int i = 0; i < program_size; i++) {
-        instruction_t *instr = &program[i];
+    // Resolve all unresolved label references
+    for (int i = 0; i < asm_state->unresolved_count; i++) {
+        unresolved_ref_t *ref = &asm_state->unresolved_refs[i];
+        bool found = false;
         
-        // Resolve operand1 if it's a direct address with unresolved label
-        if (instr->has_operand1 && instr->operand1.mode == ADDR_DIRECT && 
-            instr->operand1.value.address == -1) {
-            // This indicates an unresolved label
-            // For now, we'll just set it to 0 as a placeholder
-            // In a full implementation, you'd store the label name and resolve it here
-            instr->operand1.value.address = 0;
+        // Look for the label in our label table
+        for (int j = 0; j < asm_state->label_count; j++) {
+            if (strcmp(asm_state->labels[j].name, ref->label_name) == 0 && 
+                !asm_state->labels[j].is_data_label) {
+                // Found the label - resolve the address
+                if (ref->instruction_address >= 0 && ref->instruction_address < program_size) {
+                    instruction_t *instr = &program[ref->instruction_address];
+                    
+                    if (ref->operand_number == 1 && instr->has_operand1) {
+                        instr->operand1.value.address = asm_state->labels[j].address;
+                    } else if (ref->operand_number == 2 && instr->has_operand2) {
+                        instr->operand2.value.address = asm_state->labels[j].address;
+                    }
+                }
+                found = true;
+                break;
+            }
         }
         
-        // Resolve operand2 if it's a direct address with unresolved label
-        if (instr->has_operand2 && instr->operand2.mode == ADDR_DIRECT && 
-            instr->operand2.value.address == -1) {
-            instr->operand2.value.address = 0;
+        if (!found) {
+            printf("Error: Undefined label '%s'\n", ref->label_name);
+            success = false;
         }
     }
     
-    return true;
+    return success;
 }
 
 bool assembler_parse_file(assembler_t *asm_state, const char *filename, 
@@ -423,7 +488,7 @@ bool assembler_parse_file(assembler_t *asm_state, const char *filename,
         instruction_t instr;
         bool has_instruction;
         
-        if (!parse_instruction_line(asm_state, working_line, &instr, &has_instruction)) {
+        if (!parse_instruction_line(asm_state, working_line, &instr, &has_instruction, address)) {
             printf("Error on line %d\n", line_num);
             fclose(file);
             return false;
