@@ -164,11 +164,3 @@ Converting integers → balanced ternary (intuition):
 - Divide by 3, but allow remainders −1, 0, +1
 - “Carry” can be negative or positive
 
-
-If you dare, you can try to make use of the Trit Library and do some experiments with the TritWords.
-
-In code, we expose `TritWord` which converts both ways:
-- `TritWord.from_int(value, size=6)`
-- `TritWord(...).to_int()`
-
-Try it in Python: create a few `TritWord`s and print them; you’ll see sequences of −/0/+.

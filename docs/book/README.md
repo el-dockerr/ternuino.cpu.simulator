@@ -20,12 +20,11 @@ If you can add and subtract and are curious, you’re ready!
 - Live visualization with the included GUI
 
 ## Getting started
-- Prerequisites: Python 3.12+ (or newer), Windows/macOS/Linux
-- Clone the repo, then:
+- Prerequisites: Clang Compiler, Windows/macOS/Linux
+- Clone the repo, then see `README.md` how to build.
+- Alternatively you can download the Binaries on Github
 
-```bash
-python visualizer.py
-```
+
 
 Pick any program from the dropdown and press Load, then Step or Run. Double‑click memory lines to set breakpoints. Watch A/B/C and the A‑timeline change.
 
