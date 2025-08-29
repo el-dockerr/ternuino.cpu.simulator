@@ -1,8 +1,11 @@
 #include "ternuino.h"
 #include "tritlogic.h"
 #include "tritarith.h"
+#include "ternio.h"
+#include "devices.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 void ternuino_init(ternuino_t *cpu, int32_t dmem_size) {
     // Initialize registers
@@ -12,13 +15,38 @@ void ternuino_init(ternuino_t *cpu, int32_t dmem_size) {
     
     // Initialize state
     cpu->pc = 0;
+    cpu->sp = MAX_DATA_MEMORY_SIZE - 1; // Stack grows downward
     cpu->running = true;
+    cpu->interrupts_enabled = false;
+    cpu->in_interrupt = false;
+    cpu->pending_irq = -1;
+    cpu->saved_pc = 0;
     cpu->dmem_size = (dmem_size > MAX_DATA_MEMORY_SIZE) ? MAX_DATA_MEMORY_SIZE : dmem_size;
     
     // Clear memory
     memset(cpu->memory, 0, sizeof(cpu->memory));
     memset(cpu->data_mem, 0, sizeof(cpu->data_mem));
     memset(cpu->memory_valid, false, sizeof(cpu->memory_valid));
+    
+    // Initialize interrupt vector table
+    for (int i = 0; i < MAX_IRQ_VECTORS; i++) {
+        cpu->irq_table[i].handler_address = 0;
+        cpu->irq_table[i].enabled = false;
+    }
+    
+    // Initialize device array
+    for (int i = 0; i < MAX_DEVICES; i++) {
+        cpu->devices[i] = NULL;
+    }
+    cpu->device_count = 0;
+    
+    // Initialize file handles (legacy support)
+    for (int i = 0; i < MAX_OPEN_FILES; i++) {
+        cpu->files[i].file = NULL;
+        cpu->files[i].filename[0] = '\0';
+        cpu->files[i].is_open = false;
+        cpu->files[i].is_write_mode = false;
+    }
 }
 
 void ternuino_reset(ternuino_t *cpu) {
@@ -26,7 +54,12 @@ void ternuino_reset(ternuino_t *cpu) {
     cpu->registers[REG_B] = 0;
     cpu->registers[REG_C] = 0;
     cpu->pc = 0;
+    cpu->sp = MAX_DATA_MEMORY_SIZE - 1;
     cpu->running = true;
+    cpu->interrupts_enabled = false;
+    cpu->in_interrupt = false;
+    cpu->pending_irq = -1;
+    cpu->saved_pc = 0;
 }
 
 void ternuino_load_program(ternuino_t *cpu, instruction_t *program, int32_t program_size, 
@@ -67,6 +100,9 @@ static int32_t resolve_operand_value(ternuino_t *cpu, const operand_t *operand) 
 }
 
 void ternuino_step(ternuino_t *cpu) {
+    // Check for pending interrupts first
+    ternuino_check_interrupts(cpu);
+    
     // Halt if PC out of memory bounds
     if (cpu->pc < 0 || cpu->pc >= MAX_MEMORY_SIZE) {
         cpu->running = false;
@@ -263,12 +299,106 @@ void ternuino_step(ternuino_t *cpu) {
             }
             break;
         }
+        
+        case OP_TOPEN: {
+            // TOPEN device_id, mode  (mode: 0=read, 1=write)
+            int32_t device_id = resolve_operand_value(cpu, &instr->operand1);
+            int32_t mode = resolve_operand_value(cpu, &instr->operand2);
+            
+            device_t *device = ternuino_get_device(cpu, device_id);
+            if (device && device->open) {
+                cpu->registers[REG_A] = device->open(device, mode);
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid device ID or no open function
+            }
+            break;
+        }
+        
+        case OP_TREAD: {
+            // TREAD device_id, register
+            int32_t device_id = resolve_operand_value(cpu, &instr->operand1);
+            
+            device_t *device = ternuino_get_device(cpu, device_id);
+            if (device && device->read) {
+                int32_t value;
+                if (device->read(device, &value) == 0) {
+                    if (instr->operand2.mode == ADDR_REGISTER) {
+                        cpu->registers[instr->operand2.value.reg] = value;
+                        cpu->registers[REG_A] = 0; // Success
+                    } else {
+                        cpu->registers[REG_A] = -1; // Invalid target
+                    }
+                } else {
+                    cpu->registers[REG_A] = -1; // Read error or no data
+                }
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid device or no read function
+            }
+            break;
+        }
+        
+        case OP_TWRITE: {
+            // TWRITE device_id, value_source
+            int32_t device_id = resolve_operand_value(cpu, &instr->operand1);
+            int32_t value = resolve_operand_value(cpu, &instr->operand2);
+            
+            device_t *device = ternuino_get_device(cpu, device_id);
+            if (device && device->write) {
+                cpu->registers[REG_A] = device->write(device, value);
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid device or no write function
+            }
+            break;
+        }
+        
+        case OP_TCLOSE: {
+            // TCLOSE device_id
+            int32_t device_id = resolve_operand_value(cpu, &instr->operand1);
+            
+            device_t *device = ternuino_get_device(cpu, device_id);
+            if (device && device->close) {
+                cpu->registers[REG_A] = device->close(device);
+            } else {
+                cpu->registers[REG_A] = -1; // Invalid device or no close function
+            }
+            break;
+        }
+        
+        case OP_IRQ: {
+            // IRQ vector - software interrupt
+            int32_t vector = resolve_operand_value(cpu, &instr->operand1);
+            ternuino_trigger_irq(cpu, vector);
+            break;
+        }
+        
+        case OP_IRET: {
+            // Return from interrupt
+            if (cpu->in_interrupt && cpu->sp < MAX_DATA_MEMORY_SIZE - 1) {
+                cpu->pc = cpu->saved_pc;
+                cpu->in_interrupt = false;
+                cpu->interrupts_enabled = true;
+            }
+            break;
+        }
+        
+        case OP_EI: {
+            // Enable interrupts
+            cpu->interrupts_enabled = true;
+            break;
+        }
+        
+        case OP_DI: {
+            // Disable interrupts
+            cpu->interrupts_enabled = false;
+            break;
+        }
     }
 }
 
 void ternuino_run(ternuino_t *cpu) {
     while (cpu->running) {
         ternuino_step(cpu);
+        ternuino_tick_devices(cpu);
     }
 }
 
@@ -297,6 +427,14 @@ const char* opcode_to_string(opcode_t opcode) {
         case OP_TJZ:   return "TJZ";
         case OP_TJN:   return "TJN";
         case OP_TJP:   return "TJP";
+        case OP_TOPEN: return "TOPEN";
+        case OP_TREAD: return "TREAD";
+        case OP_TWRITE: return "TWRITE";
+        case OP_TCLOSE: return "TCLOSE";
+        case OP_IRQ:   return "IRQ";
+        case OP_IRET:  return "IRET";
+        case OP_EI:    return "EI";
+        case OP_DI:    return "DI";
         default:       return "UNKNOWN";
     }
 }
@@ -354,4 +492,109 @@ void print_cpu_state(const ternuino_t *cpu) {
     printf("Registers: A=%d, B=%d, C=%d\n", 
            cpu->registers[REG_A], cpu->registers[REG_B], cpu->registers[REG_C]);
     printf("PC: %d, Running: %s\n", cpu->pc, cpu->running ? "true" : "false");
+}
+
+// Interrupt handling functions
+void ternuino_set_irq_handler(ternuino_t *cpu, int32_t vector, int32_t handler_address) {
+    if (vector >= 0 && vector < MAX_IRQ_VECTORS) {
+        cpu->irq_table[vector].handler_address = handler_address;
+        cpu->irq_table[vector].enabled = true;
+    }
+}
+
+void ternuino_enable_irq(ternuino_t *cpu, int32_t vector) {
+    if (vector >= 0 && vector < MAX_IRQ_VECTORS) {
+        cpu->irq_table[vector].enabled = true;
+    }
+}
+
+void ternuino_disable_irq(ternuino_t *cpu, int32_t vector) {
+    if (vector >= 0 && vector < MAX_IRQ_VECTORS) {
+        cpu->irq_table[vector].enabled = false;
+    }
+}
+
+void ternuino_trigger_irq(ternuino_t *cpu, int32_t vector) {
+    if (vector >= 0 && vector < MAX_IRQ_VECTORS && 
+        cpu->interrupts_enabled && !cpu->in_interrupt &&
+        cpu->irq_table[vector].enabled) {
+        cpu->pending_irq = vector;
+    }
+}
+
+void ternuino_check_interrupts(ternuino_t *cpu) {
+    if (cpu->pending_irq != -1 && cpu->interrupts_enabled && !cpu->in_interrupt) {
+        int32_t vector = cpu->pending_irq;
+        cpu->pending_irq = -1;
+        
+        // Save current state
+        cpu->saved_pc = cpu->pc;
+        cpu->in_interrupt = true;
+        cpu->interrupts_enabled = false;
+        
+        // Jump to interrupt handler
+        cpu->pc = cpu->irq_table[vector].handler_address;
+    }
+    
+    // Check devices for pending interrupts
+    for (int i = 0; i < cpu->device_count; i++) {
+        device_t *device = cpu->devices[i];
+        if (device && (device->status & DEVICE_IRQ_PENDING)) {
+            ternuino_trigger_irq(cpu, device->irq_vector);
+        }
+    }
+}
+
+// Device management functions
+int32_t ternuino_register_device(ternuino_t *cpu, device_t *device) {
+    if (cpu->device_count >= MAX_DEVICES) {
+        return -1; // No more device slots
+    }
+    
+    // Check if device ID is already in use
+    for (int i = 0; i < cpu->device_count; i++) {
+        if (cpu->devices[i] && cpu->devices[i]->device_id == device->device_id) {
+            return -1; // Device ID already in use
+        }
+    }
+    
+    cpu->devices[cpu->device_count] = device;
+    cpu->device_count++;
+    
+    return device->device_id;
+}
+
+void ternuino_unregister_device(ternuino_t *cpu, int32_t device_id) {
+    for (int i = 0; i < cpu->device_count; i++) {
+        if (cpu->devices[i] && cpu->devices[i]->device_id == device_id) {
+            device_cleanup(cpu->devices[i]);
+            free(cpu->devices[i]);
+            
+            // Shift remaining devices down
+            for (int j = i; j < cpu->device_count - 1; j++) {
+                cpu->devices[j] = cpu->devices[j + 1];
+            }
+            cpu->devices[cpu->device_count - 1] = NULL;
+            cpu->device_count--;
+            break;
+        }
+    }
+}
+
+device_t* ternuino_get_device(ternuino_t *cpu, int32_t device_id) {
+    for (int i = 0; i < cpu->device_count; i++) {
+        if (cpu->devices[i] && cpu->devices[i]->device_id == device_id) {
+            return cpu->devices[i];
+        }
+    }
+    return NULL;
+}
+
+void ternuino_tick_devices(ternuino_t *cpu) {
+    for (int i = 0; i < cpu->device_count; i++) {
+        device_t *device = cpu->devices[i];
+        if (device && device->tick) {
+            device->tick(device, cpu);
+        }
+    }
 }
