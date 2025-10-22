@@ -1,0 +1,15 @@
+# Bodge build configuration for Ternuino project (bodge v1.0.3+)
+name: Ternuino
+
+sources: **
+output_name: build/ternuino
+
+platforms: windows_x64, linux_x64, apple_x64
+
+# Global C Compiler and Flags
+compiler: gcc
+cxx_flags: -Wall, -Wextra, -std=c99, -O2, -Iinclude, -Wunused-parameter
+
+# Platform-specific settings
+@windows_x64.cxx_flags: -static-libgcc, -static-libstdc++
+

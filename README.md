@@ -209,6 +209,11 @@ Ternary multiplication table:
 
 ### What You Need to Install
 
+#### Build
+1. Have a modern C++ Compiler available
+2. Have Bodge available
+3. Run `bodge --platform=your_platform`
+
 #### Windows Users:
 **Option 1: MSYS2 (Recommended)**
 1. Download MSYS2 from https://www.msys2.org/
