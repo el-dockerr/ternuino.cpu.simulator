@@ -211,8 +211,8 @@ Ternary multiplication table:
 
 #### Build
 1. Have a modern C++ Compiler available
-2. Have Bodge available
-3. Run `bodge --platform=your_platform`
+2. Have Bodge >= 1.0.3 available (available here: https://github.com/el-dockerr/bodge)
+3. Run `cd src && bodge --platform=your_platform` (windows_x64, linux_x64, apple_x64)
 
 #### Windows Users:
 **Option 1: MSYS2 (Recommended)**
