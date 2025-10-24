@@ -1,7 +1,7 @@
 # Bodge build configuration for Ternuino project (bodge v1.0.3+)
 name: Ternuino
 
-sources: **
+sources: include/assembler.h, include/devices.h, include/main.h, include/ternio.h, include/ternuino.h, include/tritarith.h, include/tritlogic.h, include/tritword.h,src/assembler.c, src/devices.c, src/main.c, src/ternio.c, src/ternuino.c, src/tritarith.c, src/tritlogic.c, src/tritword.c
 output_name: build/ternuino
 
 platforms: windows_x64, linux_x64, apple_x64
