@@ -73,6 +73,10 @@ test: $(TARGET)
 		fi \
 	done
 
+# Gate-level verification and cost report (non-zero exit on failure)
+gate-report: $(TARGET)
+	./$(TARGET) --gate-report
+
 # Show help
 help:
 	@echo "Ternuino CPU Simulator - C Version"
@@ -81,6 +85,7 @@ help:
 	@echo "  clean   - Remove build files"
 	@echo "  run     - Run the program in interactive mode"
 	@echo "  test    - Run all test programs"
+	@echo "  gate-report - Verify gate-level circuits and print the cost report"
 	@echo "  t3reader- Build T3 file reader utility"
 	@echo "  install - Install to system PATH"
 	@echo "  help    - Show this help message"
@@ -88,7 +93,7 @@ help:
 # Build only the T3 reader utility
 t3reader: $(T3READER)
 
-.PHONY: all clean install run test help t3reader
+.PHONY: all clean install run test help t3reader gate-report
 
 # Dependencies (header files)
 $(OBJDIR)/main.o: $(INCDIR)/ternuino.h $(INCDIR)/assembler.h $(INCDIR)/tritword.h $(INCDIR)/devices.h

@@ -41,3 +41,8 @@ jobs:
         
         echo "All tests passed!"
 
+    - name: Gate-level verification
+      working-directory: src
+      run: |
+        ./build/ternuino --gate-report
+

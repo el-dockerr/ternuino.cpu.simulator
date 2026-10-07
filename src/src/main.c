@@ -6,6 +6,7 @@
 #include "assembler.h"
 #include "tritword.h"
 #include "devices.h"
+#include "gates/gate_report.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -182,7 +183,28 @@ void interactive_mode(void) {
     }
 }
 
+// Handles `--gate-report [--gate-costs FILE]`. Returns -1 if not requested,
+// otherwise the process exit code.
+static int gate_report_mode(int argc, char *argv[]) {
+    bool report = false;
+    const char *cost_file = NULL;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--gate-report") == 0) {
+            report = true;
+        } else if (strcmp(argv[i], "--gate-costs") == 0 && i + 1 < argc) {
+            cost_file = argv[++i];
+        }
+    }
+    if (!report) return -1;
+    return gate_report_run(stdout, cost_file);
+}
+
 int main(int argc, char *argv[]) {
+    int gate_rc = gate_report_mode(argc, argv);
+    if (gate_rc >= 0) {
+        return gate_rc;
+    }
+
     // Check command line arguments
     if (argc > 1) {
         // Run specific program file
