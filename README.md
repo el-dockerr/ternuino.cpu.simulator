@@ -210,9 +210,9 @@ Ternary multiplication table:
 ### What You Need to Install
 
 #### Build
-1. Have a modern C++ Compiler available
-2. Have Bodge >= 1.0.3 available (available here: https://github.com/el-dockerr/bodge)
-3. Run `cd src && bodge --platform=your_platform` (windows_x64, linux_x64, apple_x64)
+1. Have a C99 compiler available (gcc via MinGW-w64/MSYS2 on Windows, gcc/clang on Linux/macOS)
+2. Windows: run `cd src && build-all.bat`
+3. Linux/macOS: run `cd src && make`
 
 #### Windows Users:
 **Option 1: MSYS2 (Recommended)**

@@ -1,2 +1,3 @@
 library/__pycache__/
 *.t3
+src/build/
