@@ -60,7 +60,7 @@ A friendly, beginner‑oriented guide lives in `docs/book/`.
 ### 1. **Information Density**
 - **Ternary**: Each trit can represent 3 states, giving log₂(3) ≈ 1.585 bits of information per trit
 - **Binary**: Each bit represents only 2 states (1 bit of information)
-- **Result**: Ternary is ~58% more information-dense than binary
+- **Result**: Ternary is ~58% more information-dense than binary per value
 
 ### 2. **Natural Representation of Signed Numbers**
 ```
@@ -90,7 +90,7 @@ The ternary logic operations are more intuitive:
   ```
   Decimal: 0, 1, 2, 3, 4, 5, 6, 7, 8
   Binary:  000, 001, 010, 011, 100, 101, 110, 111, 1000 (up to 4 bits)
-  Ternary: 00, 0+, +-, +0, ++, +-, +0, ++, +00 (up to 3 trits)
+  Ternary: 0, +, +−, +0, ++, +−−, +−0, +−+, +0− (up to 3 trits)
   ```
 
 ### Visual Comparison: Binary vs Ternary Logic
