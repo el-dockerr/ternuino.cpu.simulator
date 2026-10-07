@@ -20,9 +20,9 @@ For CPU Design I already have a CPU Design tool in place: [ternuino.cpu.visual-d
 ├─────────────────────────────────────────────────────────────┤
 │  REGISTERS           MEMORY              INSTRUCTION SET    │
 │  ┌─────────┐        ┌──────────┐        ┌────────────────────────────┐│
-│  │ A: trit │        │ 0: instr │        │ MOV  TAND   TSIGN  TSHL3   ││
-│  │ B: trit │        │ 1: instr │        │ ADD  TOR    TABS   TSHR3   ││
-│  │ C: trit │        │ 2: instr │        │ SUB  TNOT   TCMPR          ││
+│  │ A: word │        │ 0: instr │        │ MOV  TAND   TSIGN  TSHL3   ││
+│  │ B: word │        │ 1: instr │        │ ADD  TOR    TABS   TSHR3   ││
+│  │ C: word │        │ 2: instr │        │ SUB  TNOT   TCMPR          ││
 │  │         │        │    ...   │        │ MUL  JMP    TJN    TJP     ││
 │  │ PC: int │        │26: instr │        │ DIV  TJZ    HLT    NOP     ││
 │  └─────────┘        └──────────┘        └────────────────────────────┘│
@@ -63,7 +63,8 @@ A gate-level layer models balanced-ternary circuits built from T-CMOS primitives
 ### 1. **Information Density**
 - **Ternary**: Each trit can represent 3 states, giving log₂(3) ≈ 1.585 bits of information per trit
 - **Binary**: Each bit represents only 2 states (1 bit of information)
-- **Result**: Ternary is ~58% more information-dense than binary per value
+- **Result**: *Per digit*, a trit carries ~58% more information than a bit, so the same range needs ~37% fewer digits (e.g. 41 trits cover the range of 64 bits)
+- **Caveat**: This does not make ternary hardware more efficient by itself. Ternary only wins if one trit element (gate, wire, storage cell) costs less than ~1.585× a bit element in area, energy or delay. Measuring exactly that is the job of the [gate-level model](docs/gate-level.md).
 
 ### 2. **Natural Representation of Signed Numbers**
 ```
@@ -93,7 +94,7 @@ The ternary logic operations are more intuitive:
   ```
   Decimal: 0, 1, 2, 3, 4, 5, 6, 7, 8
   Binary:  000, 001, 010, 011, 100, 101, 110, 111, 1000 (up to 4 bits)
-  Ternary: 0, +, +−, +0, ++, +−−, +−0, +−+, +0− (up to 3 trits)
+  Ternary: 0, +, +-, +0, ++, +--, +-0, +-+, +0- (balanced, up to 3 trits)
   ```
 
 ### Visual Comparison: Binary vs Ternary Logic
@@ -120,7 +121,7 @@ or sign bit                 │  Natural signed representation:
 ## Architecture Overview
 
 ### Registers
-- **A, B, C**: General-purpose registers (each holds a single trit value)
+- **A, B, C**: General-purpose word registers. Each holds a signed integer (currently a 32-bit C `int`), not a single trit, so values such as -2 or +2 are normal. No fixed trit width or overflow wrap-around is modeled yet; results outside the 32-bit range are not handled.
 - **PC**: Program Counter
 - **Memory**: 27 memory locations (3³ addressable space)
 
