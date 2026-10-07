@@ -60,6 +60,12 @@ echo   Compiling src\devices.c...
 %CC% %CFLAGS% -c src\devices.c -o build\obj\devices.o
 if !errorlevel! neq 0 exit /b 1
 
+for %%f in (src\gates\*.c) do (
+    echo   Compiling %%f...
+    %CC% %CFLAGS% -c %%f -o build\obj\%%~nf.o
+    if !errorlevel! neq 0 exit /b 1
+)
+
 echo Linking executable...
 %CC% build\obj\*.o -o %TARGET%
 if !errorlevel! neq 0 exit /b 1

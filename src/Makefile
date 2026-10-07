@@ -13,6 +13,8 @@ OBJDIR = $(BUILDDIR)/obj
 
 # Source files (excluding utilities)
 MAIN_SOURCES = $(SRCDIR)/main.c $(SRCDIR)/ternuino.c $(SRCDIR)/assembler.c $(SRCDIR)/tritlogic.c $(SRCDIR)/tritarith.c $(SRCDIR)/tritword.c $(SRCDIR)/ternio.c $(SRCDIR)/devices.c
+GATE_SOURCES = $(wildcard $(SRCDIR)/gates/*.c)
+MAIN_SOURCES += $(GATE_SOURCES)
 MAIN_OBJECTS = $(MAIN_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 # Utility sources
@@ -44,6 +46,7 @@ $(T3READER): $(T3READER_OBJECTS) | $(OBJDIR)
 
 # Compile source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean build files
@@ -97,3 +100,4 @@ $(OBJDIR)/tritword.o: $(INCDIR)/tritword.h
 $(OBJDIR)/ternio.o: $(INCDIR)/ternio.h
 $(OBJDIR)/devices.o: $(INCDIR)/devices.h $(INCDIR)/ternuino.h $(INCDIR)/ternio.h
 $(OBJDIR)/t3reader.o: $(INCDIR)/ternio.h
+$(GATE_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o): $(wildcard $(INCDIR)/gates/*.h)
