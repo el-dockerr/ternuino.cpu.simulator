@@ -55,6 +55,9 @@ A friendly, beginner‑oriented guide lives in `docs/book/`.
 - General Ternuino Assembly [`ASSEMBLY.md`](ASSEMBLY.md)
 - I/O Operations with Ternuino Assembly [`IO_OPERATIONS.md`](IO_OPERATIONS.md)
 
+## Gate-Level Model (T-CMOS)
+A gate-level layer models balanced-ternary circuits built from T-CMOS primitives (STI, PTI, NTI, MIN, MAX) and compares them with a binary CMOS baseline. Run `./build/ternuino --gate-report` to verify the circuits and print gate counts, depth, area and energy (cost values are placeholders for now). See [`docs/gate-level.md`](docs/gate-level.md).
+
 ## Key Advantages of Ternary Over Binary Systems
 
 ### 1. **Information Density**
@@ -211,7 +214,7 @@ Ternary multiplication table:
 
 #### Build
 1. Have a C99 compiler available (gcc via MinGW-w64/MSYS2 on Windows, gcc/clang on Linux/macOS)
-2. Windows: run `cd src && build-all.bat`
+2. Windows: run `cd src && build-all.bat` (`build-all.bat test` also runs the gate-level verification)
 3. Linux/macOS: run `cd src && make`
 
 #### Windows Users:
